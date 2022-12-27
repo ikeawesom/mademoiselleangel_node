@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "Newsletter": {
+      ".read": "false",
+    	".write": "true"
+    },
+    "Products": {
+      ".read": "true",
+    	".write": "false"
+    }
+  }
+}
+
+{
+  "rules": {
+    ".read": "auth.uid === "
+  }
+}
