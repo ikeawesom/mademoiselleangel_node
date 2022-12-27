@@ -71,7 +71,7 @@ checkoutButton.addEventListener('click',function() {
             toStripe();
         } else if (method == 'paynow') {
             localStorage.setItem("paynow","true");
-            window.location.href = "/paynow.html";
+            window.location.href = "/paynow";
         }
     }
 })

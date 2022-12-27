@@ -169,7 +169,10 @@ a, .selected {
     }
 
     @media (max-width:1200px) {
-
+        #header ul li a {
+            font-size: 1.8rem;
+            line-height: 0.8rem;
+        }
         #header {
             opacity: 0.9;
         }
