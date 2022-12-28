@@ -308,50 +308,47 @@ function fileExists(url) {
 }
 
 function updateMenu(title,element,text_div) {
-    get(ref(DB,`Products/${title}`))
-    .then((snapshot) => {
-        const status = snapshot.val()["Menu"];
-        // Inside the menu
-        if (status) {
-            // Remove from menu
-            update(ref(DB,`Products/${title}`), {
-                Menu: 0
-            })
-            .then(()=>{
-                element.style.transition = "0.4s"
-                element.classList.remove("in-menu");
-                element.classList.add("no-menu");
-                text_div.innerHTML = "Add to Menu";
-                setTimeout(() => {
-                    element.style.transition = "0s";
-                }, 500);
-            })
-            .catch((error)=>{
-                alert(`ERROR ${error.code}: ${error.message}`);
-            })
+    fetch(baseURL+"admins", {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/json'
+        },
+        body: JSON.stringify({
+            option: "updateMenu",
+            title: title
+        })
+    })
+    .then((res)=> {
+        if (res.ok) {return res.json()}
+    })
+    .then((status)=>{
+        // Changed
+        if (status.added === "false") {
+            // removed from menu
+            element.style.transition = "0.4s"
+            element.classList.remove("in-menu");
+            element.classList.add("no-menu");
+            text_div.innerHTML = "Add to Menu";
+            setTimeout(() => {
+                element.style.transition = "0s";
+            }, 500);
         } else {
-            // Add to menu
-            update(ref(DB,`Products/${title}`), {
-                Menu: 1
-            })
-            .then(()=>{
-                element.style.transition = "0.4s"
-                element.classList.remove("no-menu");
-                element.classList.add("in-menu");
-                setTimeout(() => {
-                    element.style.transition = "0s";
-                }, 500);
-                text_div.innerHTML = "Remove from Menu";
-            })
-            .catch((error)=>{
-                alert(`ERROR ${error.code}: ${error.message}`);
-            })
+            // added to menu
+            element.style.transition = "0.4s"
+            element.classList.remove("no-menu");
+            element.classList.add("in-menu");
+            setTimeout(() => {
+                element.style.transition = "0s";
+            }, 500);
+            text_div.innerHTML = "Remove from Menu";
         }
     })
-    .catch((error) => {
-        alert(`ERROR ${error.code}: ${error.message}`);
-    })
 }
+
+// ---------------------- CONNECTIONS TO BACKEND ---------------------- //
+
+const curPage = window.location.pathname;
+const baseURL = "/firebaseProcess/";
 
 async function getCollection() {
     const res = await fetch(baseURL+"lastOrder", {method:'GET'});
@@ -359,12 +356,6 @@ async function getCollection() {
     const collection_text = document.querySelector("#collection-date");
     collection_text.innerHTML = data.date;
 }
-
-const curPage = window.location.pathname;
-
-// Backend
-const baseURL = "/firebaseProcess/";
-
 
 // Main page and Products
 if (curPage === "/" || curPage === "/products") {
@@ -729,7 +720,8 @@ if (curPage === "/admin/login") {
     
     // console.log("login");
     const loginButton = document.querySelector("#admin-login");
-    loginButton.addEventListener("click",function() {
+
+    function attemptLog() {
         const emailInput = document.querySelector("#admin-user").value;
         const passInput = document.querySelector("#admin-pass").value;
         
@@ -751,14 +743,22 @@ if (curPage === "/admin/login") {
             } else {
                 alert("Invalid email/password.")
             }
-        })           
-    });   
+        })   
+    }
+
+    loginButton.addEventListener("click",attemptLog);
+    loginButton.addEventListener('keydown',function(e) {
+        if (e.code === "Enter") {
+            attemptLog();
+        }
+    })
 }
 
 if (curPage === "/admin/dashboard") {
     // Dashboard pages
     document.body.style.visibility = "hidden";
     try {
+        // helper
         clearProductSession();
     } catch (error) {
         console.log(`ERROR: ${error.code}: ${error.message}`);
@@ -773,7 +773,7 @@ if (curPage === "/admin/dashboard") {
                 document.body.style.visibility = "visible";
                 setUp(user);
                 showAnnouncements();
-                // showProducts();
+                showProducts();
                 // showOrders();
                 // showNewsletter();
                 // showAdmin(user, userEmail);
@@ -799,14 +799,24 @@ if (curPage === "/admin/dashboard") {
         // Signout button
         const signoutButton = document.querySelector("#signout-button");
         signoutButton.addEventListener('click',()=>{
-            // Firebase function
-            auth.signOut().then(function() {
-                alert("You have been signed out!");
-                sessionStorage.clear();
-            }).catch((error) =>{
-                alert("An error "+error+" occured. Please contact Ike for assistance.");
-            });
-            
+            fetch(baseURL+"admins", {
+                method:'POST',
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify({
+                    option: "logoff"
+                })
+            }).then((res)=> {
+                if (res.ok) {
+                    alert("You have been signed out!");
+                    sessionStorage.clear();
+                    window.location.href="login"
+                } else {
+                    const status = res.json();
+                    alert(`ERROR ${status.code}: ${status.msg}. Please try again later.`)
+                }
+            })            
         })
         // Greeting
         const greeting = document.querySelector("#header h2");
@@ -815,36 +825,50 @@ if (curPage === "/admin/dashboard") {
 
     // Show any announcements
     function showAnnouncements() {
-        // Get elements
-        const section_announce = document.querySelector("#announcements .container");
         
-        // Show announcements
-        get(ref(DB,"Announcements/"))
-        .then((snapshot) => {
-            const announcementList = snapshot.val();
-            // console.log(announcementList);
-
-            for (const [dateRec, valueRec] of Object.entries(announcementList)) {
-
-                if (dateRec === "1") {continue;} // for firebase storage
-
-                // Details
-                const date = dateRec;
-                const text = valueRec;
-
-                // New element
-                const title = document.createElement("h4");
-                const details = document.createElement("p");
-
-                title.innerHTML = date;
-                details.innerHTML = text;
-
-                title.classList.add("heading");
-
-                section_announce.appendChild(title);
-                section_announce.appendChild(details);
+        fetch(baseURL+"admins",{
+            method:'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                option: "announce"
+            })
+        })
+        .then((res) => {
+            if (res.ok) {
+                 // received
+                return res.json()
+            } else {
+                const error = res.json();
+                console.log("her");
+                alert(`ERROR ${error.code}: ${error.msg}`)
             }
         })
+        .then((res)=> {
+                const announcementList = res;
+                const section_announce = document.querySelector("#announcements .container");
+
+                for (const [dateRec, valueRec] of Object.entries(announcementList)) {
+                    if (parseInt(dateRec) <= 1) {continue;} // for firebase storage
+    
+                    // Details
+                    const date = dateRec;
+                    const text = valueRec;
+    
+                    // New element
+                    const title = document.createElement("h4");
+                    const details = document.createElement("p");
+    
+                    title.innerHTML = date;
+                    details.innerHTML = text;
+    
+                    title.classList.add("heading");
+    
+                    section_announce.appendChild(title);
+                    section_announce.appendChild(details);
+                }
+        })          
     }
     
     // Show paynow orders
@@ -950,10 +974,14 @@ if (curPage === "/admin/dashboard") {
         const heading_products = document.querySelector("#products .heading h3");
         
         // Show Product data
-        get(ref(DB,`Products/`))
-        .then((snapshot) => {
+        async function get_allProducts() {
+            const res = await fetch(baseURL+"get_allProducts/",
+            {
+                method:'GET'
+            })
+            
             var count = 0;
-            const productList = snapshot.val();
+            const productList = await res.json();
             for (const [key, value] of Object.entries(productList)) {
                 count += 1;
                 // Details
@@ -1049,10 +1077,18 @@ if (curPage === "/admin/dashboard") {
                 item.style.animationDelay = `${index*100+100}ms`;
             })
             heading_products.innerHTML = `All Products (${count})`;
-        })
-        .catch((error) => {
-            alert(`ERROR ${error.code}: ${error.message}`);
-        });
+        }
+
+        get_allProducts();
+            
+        
+        // get(ref(DB,`Products/`))
+        // .then((snapshot) => {
+            
+        // })
+        // .catch((error) => {
+        //     alert(`ERROR ${error.code}: ${error.message}`);
+        // });
 
         // Add products
         const addProduct_button = document.querySelector("#products #add-product");
