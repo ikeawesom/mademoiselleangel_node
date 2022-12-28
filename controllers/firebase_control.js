@@ -1,6 +1,6 @@
 const { initializeApp } = require("firebase/app");
 const path = require('path');
-const { getDatabase, set, get, onValue, update, remove, ref, child } = require('firebase/database');
+const { getDatabase, set, get, update, remove, ref, child } = require('firebase/database');
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } = require('firebase/auth');
 // import {getDatabase, set, get, onValue, update, remove, ref, child} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 // import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
@@ -107,7 +107,9 @@ exports.auth_control = (req,res) => {
                     console.log("inside dashboard");
                     res.status(200).json({
                         allow:"true",
-                        id: snapshot.val()["displayName"]
+                        id: snapshot.val()["displayName"],
+                        email: snapshot.val()["email"],
+                        uid: user.uid
                     })
                 } else {
                     console.log("invalid access");
@@ -224,6 +226,106 @@ exports.admin_control = (req,res) => {
         .catch((error) => {
             alert(`ERROR ${error.code}: ${error.message}`);
         })
+    }
+    else if (option === "orders") {
+        get(ref(DB,"paynowOrders/"))
+        .then((snapshot) => {
+            res.status(200).json(snapshot.val());
+        })
+        .catch((error)=>{
+            console.log(error);
+        })
+    }
+    else if (option === "newsletter"){
+        get(ref(DB,"Newsletter/"))
+        .then((snapshot) => {
+            res.status(200).json(snapshot.val());
+        })
+        .catch((error)=>{
+            console.log(error);
+            res.sendStatus(400);
+        });
+    } 
+    else if (option === "admin") {
+        const { new_email, new_pass } = req.body;
+
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Email Change
+                if (new_email) {
+                    // Update auth
+                    updateEmail(user, new_email)
+                    .then(() => {
+                        // Update DB
+                        update(ref(DB,`Admins/${user.uid}`),{
+                            email: new_email
+                        }).then(()=> {
+                            auth.signOut().then(()=>{
+                                res.sendStatus(200);
+                            })
+                            .catch((error)=>{
+                                console.log(error);
+                                res.sendStatus(400);
+                            })
+                        })
+                        .catch((error)=>{
+                            console.log(error)
+                            res.sendStatus(400)
+                        });
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        res.sendStatus(400);
+                    });
+                }
+                // Pass Change
+                else if (new_pass) {
+                    updatePassword(user, new_pass)
+                    .then(() => {
+                        // Update DB
+                        update(ref(DB,`Admins/${user.uid}`),{
+                            password: new_pass
+                        }).then(()=> {
+                            auth.signOut().then(()=>{
+                                res.sendStatus(200);
+                            })
+                            .catch((error)=>{
+                                console.log(error);
+                                res.sendStatus(400);
+                            })
+                        })
+                        .catch((error)=>{
+                            console.log(error)
+                            res.sendStatus(400)
+                        });
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        res.sendStatus(400);
+                    });
+                } else {
+                    // get password from DB
+                    console.log("here");
+                    get(ref(DB,`Admins/${user.uid}`))
+                    .then((snapshot) => {
+                        console.log(snapshot.val()["password"]);
+                        res.status(200).json({
+                            status: snapshot.val()["password"]
+                        })
+                    })
+                    .catch((error)=>{
+                        console.log(error);
+                        res.sendStatus(400);
+                    })
+                }
+                
+            } else {
+                console.log("user logged out")
+                res.sendStatus(400);
+            }
+        })
+        
+        unsubscribe(); 
     }
     else {
         return res.sendStatus(400);

@@ -770,13 +770,15 @@ if (curPage === "/admin/dashboard") {
             const result = await res.json();
             if (result.allow === "true") {
                 const user = result.id;
+                const userEmail = result.email;
+                const uid = result.uid;
                 document.body.style.visibility = "visible";
                 setUp(user);
                 showAnnouncements();
                 showProducts();
-                // showOrders();
-                // showNewsletter();
-                // showAdmin(user, userEmail);
+                showOrders();
+                showNewsletter();
+                showAdmin(user, uid, userEmail);
                 // showDates();
             }
             else {
@@ -873,17 +875,36 @@ if (curPage === "/admin/dashboard") {
     
     // Show paynow orders
     function showOrders() {
-        // Get elements
-        const section_orders = document.querySelector("#paynowOrders .items");
-        const heading_orders = document.querySelector("#paynowOrders .heading h3");
-        const heading_prices = document.querySelector("#paynowOrders .heading .total");
 
-        // Show orders
-        get(ref(DB,"paynowOrders/"))
-        .then((snapshot) => {
-            const orderList = snapshot.val();
+        fetch(baseURL+"admins",{
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                option: "orders"
+            })
+        })
+        .then((res) =>{
+            if (res.ok) {return res.json()}
+        })
+        .then((orderList)=>{
+            // Get elements
+            const section_orders = document.querySelector("#paynowOrders .items");
+            const heading_orders = document.querySelector("#paynowOrders .heading h3");
+            const heading_prices = document.querySelector("#paynowOrders .heading .total");
+            
             var total_earnings = 0;
             var totalOrders = 0;
+
+            if (!orderList) { // if no orders
+                section_orders.classList.add("empty");
+                const emptyDiv = document.querySelector("#paynowOrders .items > .empty");
+                emptyDiv.style.display = "block";
+                heading_prices.innerHTML = `Total Earnings: SGD ${total_earnings}`;
+                heading_orders.innerHTML = `PayNow Orders (${totalOrders})`;
+                return
+            }
 
             for (const [dateRec, ordersOnDateRec] of Object.entries(orderList)) {
                 const date = dateRec;
@@ -957,13 +978,12 @@ if (curPage === "/admin/dashboard") {
                     item.style.animationDelay = `${index*100+100}ms`;
                 })
             }
-
+            
             heading_prices.innerHTML = `Total Earnings: SGD ${total_earnings}`;
-            heading_orders.innerHTML = `PayNow Orders (${totalOrders})`;
-        }).catch((error) => {
-            section_orders.classList.add("empty");
-            const emptyDiv = document.querySelector("#paynowOrders .items > .empty");
-            emptyDiv.style.display = "block";
+            heading_orders.innerHTML = `PayNow Orders (${totalOrders})`;    
+        })
+        .catch((error)=>{
+            alert(error);
         })
     }
 
@@ -1102,13 +1122,25 @@ if (curPage === "/admin/dashboard") {
 
     // Show newsletter emails
     function showNewsletter() {
-        // Show orders
-        const section_newsletter = document.querySelector("#newsletter .items");
-        const heading_newsletter = document.querySelector("#newsletter .heading h3");
 
-        get(ref(DB,"Newsletter/"))
-        .then((snapshot) => {
-            const newsLetterList = snapshot.val();
+        fetch(baseURL+"admins",{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({option:'newsletter'})
+        })
+        .then((res)=>{if (res.ok) {return res.json()}})
+        .then((newsLetterList)=>{
+            // Show newsletters
+            const section_newsletter = document.querySelector("#newsletter .items");
+            const heading_newsletter = document.querySelector("#newsletter .heading h3");
+
+            if (!newsLetterList) {
+                // Empty
+                section_newsletter.classList.add("empty");
+                const emptyDiv = document.querySelector("#newsletter .items > .empty");
+                emptyDiv.style.display = "block";
+            }
+
             var totalPeople = 0;
 
             for (const [emailRec, statusRec] of Object.entries(newsLetterList)) {
@@ -1171,16 +1203,11 @@ if (curPage === "/admin/dashboard") {
                 item.style.animationDelay = `${index*100+100}ms`;
             })
         })
-        .catch((error) => {
-            section_newsletter.classList.add("empty");
-            const emptyDiv = document.querySelector("#newsletter .items > .empty");
-            emptyDiv.style.display = "block";
-            alert("ERROR: " + error);
-        })
+        
     }
 
     // Admin stuff
-    function showAdmin(user, userEmail) {
+    function showAdmin(user, uid, userEmail) {
         const changeEmailButton = document.querySelector(".button#change-email");
         const changePassButton = document.querySelector(".button#change-pass");
 
@@ -1240,14 +1267,26 @@ if (curPage === "/admin/dashboard") {
                 const loadingIcon = document.querySelector("#admin #change-email .loading-icon");
                 buttonIcon.style.display = "none";
                 loadingIcon.style.display = "block";
-                updateEmail(user, newEmailCfmInput.value)
-                .then(() => {
-                    alert(`Email address has been changed to: ${newEmailCfmInput.value}.\n\nPlease sign in again using this new email address.`);
-                    auth.signOut();
+                
+                fetch(baseURL+"admins",{
+                    method:'POST',
+                    headers: {
+                        'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify({
+                        option: "admin",
+                        new_email: newEmailCfmInput.value
+                    })
                 })
-                .catch((error) => {
-                    alert(`ERROR ${error.code}: ${error.message}`);
-                });
+                .then((res)=>{
+                    if (res.ok) {
+                        alert(`Email address has been changed to: ${newEmailCfmInput.value}.\n\nPlease sign in again using this new email address.`);
+                        window.location.href = "login";
+                    }
+                })
+                .catch((error)=>{
+                    alert(error);
+                })
             } else {
                 errorBox.style.display = "flex";
             }
@@ -1275,11 +1314,18 @@ if (curPage === "/admin/dashboard") {
             var status_Num = false;
             var status_newCfmPass = false;
 
-            get(ref(DB,`Admins/${user.uid}`))
-            .then((snapshot) => {
-
-                const passwordRec = snapshot.val()["password"];
-
+            fetch(baseURL+"admins",{
+                method:'POST',
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify({
+                    option:"admin"
+                })
+            })
+            .then((res) => {if (res.ok) {return res.json()}})
+            .then((data) => {
+                const passwordRec = data.status;
                 if (curPassInput.value !== passwordRec) {
                     error_Wrong.style.display = "list-item";
                     curPassInput.style.border = "1px solid rgb(255, 74, 74)";
@@ -1342,34 +1388,30 @@ if (curPage === "/admin/dashboard") {
 
                 if (status_curPass && status_newCfmPass && status_Caps && status_Length && status_Low && status_Num) {
                     errorBox.style.display = "none";
-
-                    // Update Auth password
-                    updatePassword(user, newPassCfm.value).then(() => {
-                        // Update successful.
-
-                        // Update database password
-                        update(ref(DB,`Admins/${user.uid}`),{
-                            password: newPassCfm.value
-                        }).then(()=> {
-                            alert(`Password has been changed \nPlease sign in again using this new password.`);
-                            auth.signOut();
+                    
+                    fetch(baseURL+"admins",{
+                        method:'POST',
+                        headers: {
+                            'Content-Type':'application/json'
+                        },
+                        body: JSON.stringify({
+                            option: "admin",
+                            new_pass: newPassCfm.value
                         })
-                        .catch((error) => {
-                            // An error ocurred
-                            alert(`ERROR ${error.code}: ${error.message}`);
-                        });
-                        
-                    }).catch((error) => {
-                        // An error ocurred
-                        alert(`ERROR ${error.code}: ${error.message}`);
-                    });
-
+                    })
+                    .then((res)=>{
+                        if (res.ok) {
+                            alert(`Password has been changed.\n\nPlease sign in again using this new password.`);
+                            window.location.href = "login";
+                        }
+                    })
+                    .catch((error)=>{
+                        alert(error);
+                    })
+                
                 } else {
                     errorBox.style.display = "flex";
                 }
-            })
-            .catch((error) => {
-                alert(`ERROR ${error.code}: ${error.message}`);
             })
         })
     }
