@@ -11,6 +11,7 @@
 //     const descInput = document.querySelector("#product-desc");
 //     const pricesInput = document.querySelector("#product .prices .price-container")
 
+
 //     // Events
 //     return_dash.addEventListener('click',()=>{
 //         window.location.href = "../dashboard";
@@ -708,685 +709,695 @@ if (curPage === "/paynow") {
 
 // Log in admin page
 if (curPage === "/admin/login") {
-
-    function authenticate() {
-        fetch(baseURL+"authenticate",{method:'GET'})
-        .then((res) => {
-            if (res.ok) {
-                window.location.href="dashboard"
+    
+    async function authenticate() {
+        // console.log("auth");
+        const res = await fetch(baseURL+"authenticate",{method:'GET'});
+        if (res.ok) {
+            const data = await res.json();
+            if (data.allow === "true") {
+                window.location.href = "dashboard";
             }
             else {
-                // console.log("here");
-                const loginButton = document.querySelector("#admin-login");
-
-                loginButton.addEventListener("click",function() {
-                    const emailInput = document.querySelector("#admin-user").value;
-                    const passInput = document.querySelector("#admin-pass").value;
-                    
-                    fetch(baseURL+`login`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type':'application/json'
-                        },
-                        body: JSON.stringify({
-                            email: emailInput,
-                            pass: passInput
-                        })
-                    })
-                    .then((res) => {
-                        if (res.ok) {
-                            // console.log("logged into dashboard");
-                            window.location.href = "dashboard"
-                        } else {
-                            alert("Invalid email/password.")
-                        }
-                    })           
-                });
+                alert("You are not authorised past this page.")
+                window.location.href = "/";
             }
-            
-        })
-        .catch((error)=> {
-            console.log(error);
-        })
+        }
     }
 
     authenticate();
+    
+    // console.log("login");
+    const loginButton = document.querySelector("#admin-login");
+    loginButton.addEventListener("click",function() {
+        const emailInput = document.querySelector("#admin-user").value;
+        const passInput = document.querySelector("#admin-pass").value;
+        
+        fetch(baseURL+`login`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                email: emailInput,
+                pass: passInput
+            })
+        })
+        .then((res) => {
+            if (res.ok) {
+                // console.log("logged into dashboard");
+                authenticate();
+            } else {
+                alert("Invalid email/password.")
+            }
+        })           
+    });   
 }
 
-// if (curPage === "/admin/dashboard") {
-//     // Dashboard pages
-//     document.body.style.visibility = "hidden";
-//     try {
-//         clearProductSession();
-//     } catch (error) {
-//         console.log(`ERROR: ${error.code}: ${error.message}`);
-//     }
+if (curPage === "/admin/dashboard") {
+    // Dashboard pages
+    document.body.style.visibility = "hidden";
+    try {
+        clearProductSession();
+    } catch (error) {
+        console.log(`ERROR: ${error.code}: ${error.message}`);
+    }
     
-//     fetch(baseURL+"authenticate",{method:'GET'})
-//     .then((res) => {
-//         if (res.ok) {
-//             document.body.style.visibility = "visible";
-//             setUp();
-//             showAnnouncements();
-//             showProducts();
-//             showOrders();
-//             showNewsletter();
-//             showAdmin(user, userEmail);
-//             showDates();
-//         } else {
-//             window.location.href="login";
-//         }
-//     })
+    async function authenticate() {
+        const res = await fetch(baseURL+"authenticate",{method:'GET'});
+        if (res.ok) {
+            const result = await res.json();
+            if (result.allow === "true") {
+                const user = result.id;
+                document.body.style.visibility = "visible";
+                setUp(user);
+                showAnnouncements();
+                // showProducts();
+                // showOrders();
+                // showNewsletter();
+                // showAdmin(user, userEmail);
+                // showDates();
+            }
+            else {
+                alert("You are not authorised to this page.")
+                window.location.href = "/";
+            }
+        } else {
+            window.location.href="login";
+        }
+    }
 
-//     // Set up basic events
-//     function setUp() {
-//         // Header
-//         const returnHomepage = document.querySelector("#return-homepage");
-//         returnHomepage.addEventListener('click',resetSession);
+    authenticate();
 
-//         // Signout button
-//         const signoutButton = document.querySelector("#signout-button");
-//         signoutButton.addEventListener('click',()=>{
-//             // Firebase function
-//             auth.signOut().then(function() {
-//                 alert("You have been signed out!");
-//                 sessionStorage.clear();
-//             }).catch((error) =>{
-//                 alert("An error "+error+" occured. Please contact Ike for assistance.");
-//             });
+    // Set up basic events
+    function setUp(user) {
+        // Header
+        const returnHomepage = document.querySelector("#return-homepage");
+        returnHomepage.addEventListener('click',resetSession);
+
+        // Signout button
+        const signoutButton = document.querySelector("#signout-button");
+        signoutButton.addEventListener('click',()=>{
+            // Firebase function
+            auth.signOut().then(function() {
+                alert("You have been signed out!");
+                sessionStorage.clear();
+            }).catch((error) =>{
+                alert("An error "+error+" occured. Please contact Ike for assistance.");
+            });
             
-//         })
-//         // Greeting
-//         const greeting = document.querySelector("#header h2");
-//         greeting.innerHTML = `Welcome to your dashboard, ${user}.`;
-//     }
+        })
+        // Greeting
+        const greeting = document.querySelector("#header h2");
+        greeting.innerHTML = `Welcome to your dashboard, ${user}.`;
+    }
 
-//     // Show any announcements
-//     function showAnnouncements() {
-//         // Get elements
-//         const section_announce = document.querySelector("#announcements .container");
+    // Show any announcements
+    function showAnnouncements() {
+        // Get elements
+        const section_announce = document.querySelector("#announcements .container");
         
-//         // Show announcements
-//         get(ref(DB,"Announcements/"))
-//         .then((snapshot) => {
-//             const announcementList = snapshot.val();
-//             // console.log(announcementList);
+        // Show announcements
+        get(ref(DB,"Announcements/"))
+        .then((snapshot) => {
+            const announcementList = snapshot.val();
+            // console.log(announcementList);
 
-//             for (const [dateRec, valueRec] of Object.entries(announcementList)) {
+            for (const [dateRec, valueRec] of Object.entries(announcementList)) {
 
-//                 if (dateRec === "1") {continue;} // for firebase storage
+                if (dateRec === "1") {continue;} // for firebase storage
 
-//                 // Details
-//                 const date = dateRec;
-//                 const text = valueRec;
+                // Details
+                const date = dateRec;
+                const text = valueRec;
 
-//                 // New element
-//                 const title = document.createElement("h4");
-//                 const details = document.createElement("p");
+                // New element
+                const title = document.createElement("h4");
+                const details = document.createElement("p");
 
-//                 title.innerHTML = date;
-//                 details.innerHTML = text;
+                title.innerHTML = date;
+                details.innerHTML = text;
 
-//                 title.classList.add("heading");
+                title.classList.add("heading");
 
-//                 section_announce.appendChild(title);
-//                 section_announce.appendChild(details);
-//             }
-//         })
-//     }
+                section_announce.appendChild(title);
+                section_announce.appendChild(details);
+            }
+        })
+    }
     
-//     // Show paynow orders
-//     function showOrders() {
-//         // Get elements
-//         const section_orders = document.querySelector("#paynowOrders .items");
-//         const heading_orders = document.querySelector("#paynowOrders .heading h3");
-//         const heading_prices = document.querySelector("#paynowOrders .heading .total");
+    // Show paynow orders
+    function showOrders() {
+        // Get elements
+        const section_orders = document.querySelector("#paynowOrders .items");
+        const heading_orders = document.querySelector("#paynowOrders .heading h3");
+        const heading_prices = document.querySelector("#paynowOrders .heading .total");
 
-//         // Show orders
-//         get(ref(DB,"paynowOrders/"))
-//         .then((snapshot) => {
-//             const orderList = snapshot.val();
-//             var total_earnings = 0;
-//             var totalOrders = 0;
+        // Show orders
+        get(ref(DB,"paynowOrders/"))
+        .then((snapshot) => {
+            const orderList = snapshot.val();
+            var total_earnings = 0;
+            var totalOrders = 0;
 
-//             for (const [dateRec, ordersOnDateRec] of Object.entries(orderList)) {
-//                 const date = dateRec;
-//                 const ordersOnDate = ordersOnDateRec;
+            for (const [dateRec, ordersOnDateRec] of Object.entries(orderList)) {
+                const date = dateRec;
+                const ordersOnDate = ordersOnDateRec;
                 
-//                 var orderCountDate = 0;
+                var orderCountDate = 0;
 
-//                 // New date tag
-//                 const dateElement = document.createElement("p");
-//                 dateElement.classList.add("date");
+                // New date tag
+                const dateElement = document.createElement("p");
+                dateElement.classList.add("date");
 
-//                 // Append date tag
-//                 section_orders.appendChild(dateElement);
+                // Append date tag
+                section_orders.appendChild(dateElement);
 
-//                 // Iterate through orders on particular date
-//                 for (const [orderTimeRec, orderDetailsRec] of Object.entries(ordersOnDate)) {
-//                     orderCountDate += 1;
+                // Iterate through orders on particular date
+                for (const [orderTimeRec, orderDetailsRec] of Object.entries(ordersOnDate)) {
+                    orderCountDate += 1;
 
-//                     // Details
-//                     const time = orderTimeRec;
-//                     const id = orderDetailsRec["id"];
-//                     const email = orderDetailsRec["email"];
-//                     const paid = orderDetailsRec["paid"];
+                    // Details
+                    const time = orderTimeRec;
+                    const id = orderDetailsRec["id"];
+                    const email = orderDetailsRec["email"];
+                    const paid = orderDetailsRec["paid"];
 
-//                     // New elements
-//                     const itemDiv = document.createElement("div");
-//                         const detailsDiv = document.createElement("div");
-//                             const timeElement = document.createElement("p");
-//                             const idElement = document.createElement("h4");
-//                             const emailElement = document.createElement("p");
-//                         const paidElement = document.createElement("h4");
+                    // New elements
+                    const itemDiv = document.createElement("div");
+                        const detailsDiv = document.createElement("div");
+                            const timeElement = document.createElement("p");
+                            const idElement = document.createElement("h4");
+                            const emailElement = document.createElement("p");
+                        const paidElement = document.createElement("h4");
 
-//                     // Assign identities
-//                     itemDiv.classList.add("container");
-//                     itemDiv.classList.add("item");
-//                     itemDiv.classList.add("orders");
+                    // Assign identities
+                    itemDiv.classList.add("container");
+                    itemDiv.classList.add("item");
+                    itemDiv.classList.add("orders");
 
-//                     detailsDiv.classList.add("block-text");
+                    detailsDiv.classList.add("block-text");
 
-//                     timeElement.classList.add("time");
+                    timeElement.classList.add("time");
 
-//                     emailElement.classList.add("email");
+                    emailElement.classList.add("email");
 
-//                     // Assign values
-//                     timeElement.innerHTML = time;
-//                     idElement.innerHTML = id;
-//                     emailElement.innerHTML = email;
-//                     paidElement.innerHTML = `SGD ${paid}`;
+                    // Assign values
+                    timeElement.innerHTML = time;
+                    idElement.innerHTML = id;
+                    emailElement.innerHTML = email;
+                    paidElement.innerHTML = `SGD ${paid}`;
 
-//                     // Calculate total
-//                     total_earnings += parseInt(paid);
+                    // Calculate total
+                    total_earnings += parseInt(paid);
 
-//                     // Append children
-//                     detailsDiv.appendChild(timeElement);
-//                     detailsDiv.appendChild(idElement);
-//                     detailsDiv.appendChild(emailElement);
+                    // Append children
+                    detailsDiv.appendChild(timeElement);
+                    detailsDiv.appendChild(idElement);
+                    detailsDiv.appendChild(emailElement);
 
-//                     itemDiv.appendChild(detailsDiv);
-//                     itemDiv.appendChild(paidElement);
+                    itemDiv.appendChild(detailsDiv);
+                    itemDiv.appendChild(paidElement);
 
-//                     section_orders.appendChild(itemDiv);
-//                 }
+                    section_orders.appendChild(itemDiv);
+                }
                 
-//                 totalOrders += orderCountDate;
+                totalOrders += orderCountDate;
 
-//                 dateElement.innerHTML = `${date} (${orderCountDate})`;    
+                dateElement.innerHTML = `${date} (${orderCountDate})`;    
                 
-//                 const orderChildrenList = document.querySelectorAll("#paynowOrders .items .container.item");
-//                 // Adds animation to each product block
-//                 orderChildrenList.forEach((item, index) => {
-//                     item.style.animationDelay = `${index*100+100}ms`;
-//                 })
-//             }
+                const orderChildrenList = document.querySelectorAll("#paynowOrders .items .container.item");
+                // Adds animation to each product block
+                orderChildrenList.forEach((item, index) => {
+                    item.style.animationDelay = `${index*100+100}ms`;
+                })
+            }
 
-//             heading_prices.innerHTML = `Total Earnings: SGD ${total_earnings}`;
-//             heading_orders.innerHTML = `PayNow Orders (${totalOrders})`;
-//         }).catch((error) => {
-//             section_orders.classList.add("empty");
-//             const emptyDiv = document.querySelector("#paynowOrders .items > .empty");
-//             emptyDiv.style.display = "block";
-//         })
-//     }
+            heading_prices.innerHTML = `Total Earnings: SGD ${total_earnings}`;
+            heading_orders.innerHTML = `PayNow Orders (${totalOrders})`;
+        }).catch((error) => {
+            section_orders.classList.add("empty");
+            const emptyDiv = document.querySelector("#paynowOrders .items > .empty");
+            emptyDiv.style.display = "block";
+        })
+    }
 
-//     // Show products and menu
-//     function showProducts() {
-//         // Get elements
-//         const section_products = document.querySelector("#products .items");
-//         const heading_products = document.querySelector("#products .heading h3");
+    // Show products and menu
+    function showProducts() {
+        // Get elements
+        const section_products = document.querySelector("#products .items");
+        const heading_products = document.querySelector("#products .heading h3");
         
-//         // Show Product data
-//         get(ref(DB,`Products/`))
-//         .then((snapshot) => {
-//             var count = 0;
-//             const productList = snapshot.val();
-//             for (const [key, value] of Object.entries(productList)) {
-//                 count += 1;
-//                 // Details
-//                 const title = value["Title"];
-//                 const desc = value["Desc"];
-//                 const priceList = value["Prices"].split(";");
-//                 var prices = "";
+        // Show Product data
+        get(ref(DB,`Products/`))
+        .then((snapshot) => {
+            var count = 0;
+            const productList = snapshot.val();
+            for (const [key, value] of Object.entries(productList)) {
+                count += 1;
+                // Details
+                const title = value["Title"];
+                const desc = value["Desc"];
+                const priceList = value["Prices"].split(";");
+                var prices = "";
                 
-//                 priceList.forEach((price)=>{
-//                     prices += price + ", ";
-//                 })
+                priceList.forEach((price)=>{
+                    prices += price + ", ";
+                })
                 
-//                 prices = prices.substring(0, prices.length-2);
+                prices = prices.substring(0, prices.length-2);
 
-//                 // Create filename based on title
-//                 const filename = title.split(" ").join("-");
-//                 const filepath = `../resources/product-${filename}-1.png`;
+                // Create filename based on title
+                const filename = title.split(" ").join("-");
+                const filepath = `../resources/product-${filename}-1.png`;
 
-//                 // New element
-//                 const newItem = document.createElement("div");
-//                 const flex_div = document.createElement("div");
-//                 const image = document.createElement("img");
-//                 const block = document.createElement("div");
-//                 const titleElement = document.createElement("h4");
-//                 const priceElement = document.createElement("p");
-//                 const button_div = document.createElement("div");
-//                 const text_div = document.createElement("div");
+                // New element
+                const newItem = document.createElement("div");
+                const flex_div = document.createElement("div");
+                const image = document.createElement("img");
+                const block = document.createElement("div");
+                const titleElement = document.createElement("h4");
+                const priceElement = document.createElement("p");
+                const button_div = document.createElement("div");
+                const text_div = document.createElement("div");
 
-//                 // Assign identities
-//                 newItem.classList.add("container");
-//                 newItem.classList.add("item");
+                // Assign identities
+                newItem.classList.add("container");
+                newItem.classList.add("item");
 
-//                 flex_div.classList.add("flex");
+                flex_div.classList.add("flex");
 
-//                 block.classList.add("block-text");
+                block.classList.add("block-text");
 
-//                 button_div.classList.add("button");
-//                 button_div.classList.add("update-menu");
-//                 button_div.dataset.productName = title;
+                button_div.classList.add("button");
+                button_div.classList.add("update-menu");
+                button_div.dataset.productName = title;
 
-//                 text_div.classList.add("text");
+                text_div.classList.add("text");
 
-//                 // Append children
-//                 block.appendChild(titleElement);
-//                 block.appendChild(priceElement);
+                // Append children
+                block.appendChild(titleElement);
+                block.appendChild(priceElement);
 
-//                 flex_div.appendChild(image);
-//                 flex_div.appendChild(block);                
+                flex_div.appendChild(image);
+                flex_div.appendChild(block);                
 
-//                 button_div.appendChild(text_div);
+                button_div.appendChild(text_div);
 
-//                 newItem.append(flex_div);
-//                 newItem.appendChild(button_div)
+                newItem.append(flex_div);
+                newItem.appendChild(button_div)
                 
-//                 // Add click event
-//                 titleElement.addEventListener('click',() => {
-//                     sessionStorage.setItem("title",title);
-//                     sessionStorage.setItem("desc",desc);
-//                     sessionStorage.setItem("prices",value["Prices"]);
-//                     sessionStorage.setItem("filepath",filepath);
-//                     window.location.href = "dashboard/product"
-//                 })
+                // Add click event
+                titleElement.addEventListener('click',() => {
+                    sessionStorage.setItem("title",title);
+                    sessionStorage.setItem("desc",desc);
+                    sessionStorage.setItem("prices",value["Prices"]);
+                    sessionStorage.setItem("filepath",filepath);
+                    window.location.href = "dashboard/product"
+                })
 
-//                 // Assign values
-//                 if (fileExists(filepath)) {
-//                     image.src = filepath;
-//                 } else {
-//                     image.src = '../resources/image-unavailable.png';
-//                 }
-//                 titleElement.innerHTML = title;
-//                 priceElement.innerHTML = prices;
-//                 section_products.appendChild(newItem);
+                // Assign values
+                if (fileExists(filepath)) {
+                    image.src = filepath;
+                } else {
+                    image.src = '../resources/image-unavailable.png';
+                }
+                titleElement.innerHTML = title;
+                priceElement.innerHTML = prices;
+                section_products.appendChild(newItem);
 
-//                 if (value["Menu"]) {
-//                     text_div.innerHTML = "Remove from Menu"
-//                     newItem.classList.add("in-menu");
-//                 } else {
-//                     text_div.innerHTML = "Add To Menu";
-//                     newItem.classList.add("no-menu");
-//                 }
+                if (value["Menu"]) {
+                    text_div.innerHTML = "Remove from Menu"
+                    newItem.classList.add("in-menu");
+                } else {
+                    text_div.innerHTML = "Add To Menu";
+                    newItem.classList.add("no-menu");
+                }
 
-//                 button_div.addEventListener('click',function() {
-//                     updateMenu(title,newItem,text_div);
-//                 })
-//             }
+                button_div.addEventListener('click',function() {
+                    updateMenu(title,newItem,text_div);
+                })
+            }
 
-//             if (count > 4) {
-//                 section_products.style.overflowY = "scroll";
-//             }
-//             // Adds animation to each product block
-//             const productChildrenList = document.querySelectorAll("#products .items .container.item");
-//             productChildrenList.forEach((item, index) => {
-//                 item.style.animationDelay = `${index*100+100}ms`;
-//             })
-//             heading_products.innerHTML = `All Products (${count})`;
-//         })
-//         .catch((error) => {
-//             alert(`ERROR ${error.code}: ${error.message}`);
-//         });
+            if (count > 4) {
+                section_products.style.overflowY = "scroll";
+            }
+            // Adds animation to each product block
+            const productChildrenList = document.querySelectorAll("#products .items .container.item");
+            productChildrenList.forEach((item, index) => {
+                item.style.animationDelay = `${index*100+100}ms`;
+            })
+            heading_products.innerHTML = `All Products (${count})`;
+        })
+        .catch((error) => {
+            alert(`ERROR ${error.code}: ${error.message}`);
+        });
 
-//         // Add products
-//         const addProduct_button = document.querySelector("#products #add-product");
-//         addProduct_button.addEventListener('click',()=> {
-//             console.log("click");
-//             sessionStorage.setItem("add-item","true");
-//             window.location.href = "dashboard/product"
-//         })
+        // Add products
+        const addProduct_button = document.querySelector("#products #add-product");
+        addProduct_button.addEventListener('click',()=> {
+            console.log("click");
+            sessionStorage.setItem("add-item","true");
+            window.location.href = "dashboard/product"
+        })
 
-//     }
+    }
 
-//     // Show newsletter emails
-//     function showNewsletter() {
-//         // Show orders
-//         const section_newsletter = document.querySelector("#newsletter .items");
-//         const heading_newsletter = document.querySelector("#newsletter .heading h3");
+    // Show newsletter emails
+    function showNewsletter() {
+        // Show orders
+        const section_newsletter = document.querySelector("#newsletter .items");
+        const heading_newsletter = document.querySelector("#newsletter .heading h3");
 
-//         get(ref(DB,"Newsletter/"))
-//         .then((snapshot) => {
-//             const newsLetterList = snapshot.val();
-//             var totalPeople = 0;
+        get(ref(DB,"Newsletter/"))
+        .then((snapshot) => {
+            const newsLetterList = snapshot.val();
+            var totalPeople = 0;
 
-//             for (const [emailRec, statusRec] of Object.entries(newsLetterList)) {
-//                 totalPeople += 1;
+            for (const [emailRec, statusRec] of Object.entries(newsLetterList)) {
+                totalPeople += 1;
 
-//                 // Details
-//                 var email = "";
-//                 for (let i = 0; i < emailRec.length; i++) {
-//                     if (emailRec.charAt(i) === "-") {
-//                         email += "@";
-//                     }
-//                     else if (emailRec.charAt(i) === "_") {
-//                         email += ".";
-//                     }
-//                     else {
-//                         email += emailRec.charAt(i);
-//                     }
-//                 }
+                // Details
+                var email = "";
+                for (let i = 0; i < emailRec.length; i++) {
+                    if (emailRec.charAt(i) === "-") {
+                        email += "@";
+                    }
+                    else if (emailRec.charAt(i) === "_") {
+                        email += ".";
+                    }
+                    else {
+                        email += emailRec.charAt(i);
+                    }
+                }
 
-//                 var status = "";
-//                 for (const [typeRec, typeStatusRec] of Object.entries(statusRec)) {
-//                     status += `${typeRec}: ${typeStatusRec}`;
-//                 }
+                var status = "";
+                for (const [typeRec, typeStatusRec] of Object.entries(statusRec)) {
+                    status += `${typeRec}: ${typeStatusRec}`;
+                }
                 
                 
-//                 // New elements
-//                 const itemDiv = document.createElement("div");
-//                     const detailsDiv = document.createElement("div");
-//                         const emailElement = document.createElement("h4");
-//                         const statusElement = document.createElement("p");
+                // New elements
+                const itemDiv = document.createElement("div");
+                    const detailsDiv = document.createElement("div");
+                        const emailElement = document.createElement("h4");
+                        const statusElement = document.createElement("p");
 
-//                 // Assign identities
-//                 itemDiv.classList.add("container");
-//                 itemDiv.classList.add("item");
+                // Assign identities
+                itemDiv.classList.add("container");
+                itemDiv.classList.add("item");
 
-//                 detailsDiv.classList.add("block-text");
+                detailsDiv.classList.add("block-text");
 
-//                 // Assign values
-//                 emailElement.innerHTML = email;
-//                 statusElement.innerHTML = status;
+                // Assign values
+                emailElement.innerHTML = email;
+                statusElement.innerHTML = status;
 
-//                 // Append children
-//                 detailsDiv.appendChild(emailElement);
-//                 detailsDiv.appendChild(statusElement);
+                // Append children
+                detailsDiv.appendChild(emailElement);
+                detailsDiv.appendChild(statusElement);
 
-//                 itemDiv.appendChild(detailsDiv);
+                itemDiv.appendChild(detailsDiv);
 
-//                 section_newsletter.appendChild(itemDiv);
-//             }
+                section_newsletter.appendChild(itemDiv);
+            }
             
-//             heading_newsletter.innerHTML = `Newsletter Emails (${totalPeople})`;    
+            heading_newsletter.innerHTML = `Newsletter Emails (${totalPeople})`;    
             
-//             if (totalPeople > 5) {
-//                 section_newsletter.style.overflowY = "scroll";
-//             }
+            if (totalPeople > 5) {
+                section_newsletter.style.overflowY = "scroll";
+            }
 
-//             const newsChildrenList = document.querySelectorAll("#newsletter .items .container.item");
-//             // Adds animation to each product block
-//             newsChildrenList.forEach((item, index) => {
-//                 item.style.animationDelay = `${index*100+100}ms`;
-//             })
-//         })
-//         .catch((error) => {
-//             section_newsletter.classList.add("empty");
-//             const emptyDiv = document.querySelector("#newsletter .items > .empty");
-//             emptyDiv.style.display = "block";
-//             alert("ERROR: " + error);
-//         })
-//     }
+            const newsChildrenList = document.querySelectorAll("#newsletter .items .container.item");
+            // Adds animation to each product block
+            newsChildrenList.forEach((item, index) => {
+                item.style.animationDelay = `${index*100+100}ms`;
+            })
+        })
+        .catch((error) => {
+            section_newsletter.classList.add("empty");
+            const emptyDiv = document.querySelector("#newsletter .items > .empty");
+            emptyDiv.style.display = "block";
+            alert("ERROR: " + error);
+        })
+    }
 
-//     // Admin stuff
-//     function showAdmin(user, userEmail) {
-//         const changeEmailButton = document.querySelector(".button#change-email");
-//         const changePassButton = document.querySelector(".button#change-pass");
+    // Admin stuff
+    function showAdmin(user, userEmail) {
+        const changeEmailButton = document.querySelector(".button#change-email");
+        const changePassButton = document.querySelector(".button#change-pass");
 
-//         changeEmailButton.addEventListener('click', () => {
-//             // Get elements
-//             const curEmailInput = document.querySelector("#email-cur");
-//             const newEmailInput = document.querySelector("#email-new");
-//             const newEmailCfmInput = document.querySelector("#email-new-cfm");
+        changeEmailButton.addEventListener('click', () => {
+            // Get elements
+            const curEmailInput = document.querySelector("#email-cur");
+            const newEmailInput = document.querySelector("#email-new");
+            const newEmailCfmInput = document.querySelector("#email-new-cfm");
 
-//             // Error box
-//             const errorBox = document.querySelector("#email-error")
-//             const errorEmail = document.querySelector("#email-wrong");
-//             const errorInvalidEmail = document.querySelector("#email-invalid");
-//             const errorInvalidEmailCfm = document.querySelector("#email-mismatch");
+            // Error box
+            const errorBox = document.querySelector("#email-error")
+            const errorEmail = document.querySelector("#email-wrong");
+            const errorInvalidEmail = document.querySelector("#email-invalid");
+            const errorInvalidEmailCfm = document.querySelector("#email-mismatch");
 
-//             errorBox.style.display = "flex";
+            errorBox.style.display = "flex";
 
-//             var correctCurrentEmail = false;
-//             var validNewEmail = false
-//             var validNewEmailCfm = false;
+            var correctCurrentEmail = false;
+            var validNewEmail = false
+            var validNewEmailCfm = false;
 
-//             // Validation
-//             if (curEmailInput.value !== userEmail) {
-//                 errorEmail.style.display = "list-item";
-//                 curEmailInput.style.border = "1px solid rgb(255, 74, 74)";
-//                 correctCurrentEmail = false;
-//             } else {
-//                 curEmailInput.style.border = "none";
-//                 errorEmail.style.display = "none";
-//                 correctCurrentEmail = true;
-//             }
+            // Validation
+            if (curEmailInput.value !== userEmail) {
+                errorEmail.style.display = "list-item";
+                curEmailInput.style.border = "1px solid rgb(255, 74, 74)";
+                correctCurrentEmail = false;
+            } else {
+                curEmailInput.style.border = "none";
+                errorEmail.style.display = "none";
+                correctCurrentEmail = true;
+            }
 
-//             if (!ValidateEmail(newEmailInput.value)) {
-//                 errorInvalidEmail.style.display = "list-item";
-//                 newEmailInput.style.border = "1px solid rgb(255, 74, 74)";
-//                 validNewEmail = false;
-//             } else {
-//                 errorInvalidEmail.style.display = "none";
-//                 newEmailInput.style.border = "none";
-//                 validNewEmail = true;
-//             }
+            if (!ValidateEmail(newEmailInput.value)) {
+                errorInvalidEmail.style.display = "list-item";
+                newEmailInput.style.border = "1px solid rgb(255, 74, 74)";
+                validNewEmail = false;
+            } else {
+                errorInvalidEmail.style.display = "none";
+                newEmailInput.style.border = "none";
+                validNewEmail = true;
+            }
 
-//             if (newEmailCfmInput.value !== newEmailInput.value) {
-//                 errorInvalidEmailCfm.style.display = "list-item";
-//                 newEmailCfmInput.style.border = "1px solid rgb(255, 74, 74)";
-//                 validNewEmailCfm = false;
-//             } else {
-//                 errorInvalidEmailCfm.style.display = "none";
-//                 newEmailCfmInput.style.border = "none";
-//                 validNewEmailCfm = true;
-//             }
+            if (newEmailCfmInput.value !== newEmailInput.value) {
+                errorInvalidEmailCfm.style.display = "list-item";
+                newEmailCfmInput.style.border = "1px solid rgb(255, 74, 74)";
+                validNewEmailCfm = false;
+            } else {
+                errorInvalidEmailCfm.style.display = "none";
+                newEmailCfmInput.style.border = "none";
+                validNewEmailCfm = true;
+            }
 
-//             // Change email firebase
-//             if (correctCurrentEmail && validNewEmail && validNewEmailCfm) {
-//                 errorBox.style.display = "none";
-//                 const buttonIcon = document.querySelector("#change-email .button-icon");
-//                 const loadingIcon = document.querySelector("#admin #change-email .loading-icon");
-//                 buttonIcon.style.display = "none";
-//                 loadingIcon.style.display = "block";
-//                 updateEmail(user, newEmailCfmInput.value)
-//                 .then(() => {
-//                     alert(`Email address has been changed to: ${newEmailCfmInput.value}.\n\nPlease sign in again using this new email address.`);
-//                     auth.signOut();
-//                 })
-//                 .catch((error) => {
-//                     alert(`ERROR ${error.code}: ${error.message}`);
-//                 });
-//             } else {
-//                 errorBox.style.display = "flex";
-//             }
-//         })
+            // Change email firebase
+            if (correctCurrentEmail && validNewEmail && validNewEmailCfm) {
+                errorBox.style.display = "none";
+                const buttonIcon = document.querySelector("#change-email .button-icon");
+                const loadingIcon = document.querySelector("#admin #change-email .loading-icon");
+                buttonIcon.style.display = "none";
+                loadingIcon.style.display = "block";
+                updateEmail(user, newEmailCfmInput.value)
+                .then(() => {
+                    alert(`Email address has been changed to: ${newEmailCfmInput.value}.\n\nPlease sign in again using this new email address.`);
+                    auth.signOut();
+                })
+                .catch((error) => {
+                    alert(`ERROR ${error.code}: ${error.message}`);
+                });
+            } else {
+                errorBox.style.display = "flex";
+            }
+        })
 
-//         changePassButton.addEventListener('click', () => {
-//             // Get elements
-//             const curPassInput = document.querySelector("#pass-cur");
-//             const newPassInput = document.querySelector("#pass-new");
-//             const newPassCfm = document.querySelector("#pass-new-cfm");
+        changePassButton.addEventListener('click', () => {
+            // Get elements
+            const curPassInput = document.querySelector("#pass-cur");
+            const newPassInput = document.querySelector("#pass-new");
+            const newPassCfm = document.querySelector("#pass-new-cfm");
 
-//             // Error bpx
-//             const errorBox = document.querySelector("#pass-error");
-//             const error_Wrong = document.querySelector("#pass-wrong");
-//             const error_Length = document.querySelector("#pass-short");
-//             const error_Caps = document.querySelector("#pass-caps");
-//             const error_Low = document.querySelector("#pass-low");
-//             const error_Num = document.querySelector("#pass-num");
-//             const error_mismatch = document.querySelector("#pass-mismatch");
+            // Error bpx
+            const errorBox = document.querySelector("#pass-error");
+            const error_Wrong = document.querySelector("#pass-wrong");
+            const error_Length = document.querySelector("#pass-short");
+            const error_Caps = document.querySelector("#pass-caps");
+            const error_Low = document.querySelector("#pass-low");
+            const error_Num = document.querySelector("#pass-num");
+            const error_mismatch = document.querySelector("#pass-mismatch");
 
-//             var status_curPass = false;
-//             var status_Length = false;
-//             var status_Caps = false;
-//             var status_Low = false;
-//             var status_Num = false;
-//             var status_newCfmPass = false;
+            var status_curPass = false;
+            var status_Length = false;
+            var status_Caps = false;
+            var status_Low = false;
+            var status_Num = false;
+            var status_newCfmPass = false;
 
-//             get(ref(DB,`Admins/${user.uid}`))
-//             .then((snapshot) => {
+            get(ref(DB,`Admins/${user.uid}`))
+            .then((snapshot) => {
 
-//                 const passwordRec = snapshot.val()["password"];
+                const passwordRec = snapshot.val()["password"];
 
-//                 if (curPassInput.value !== passwordRec) {
-//                     error_Wrong.style.display = "list-item";
-//                     curPassInput.style.border = "1px solid rgb(255, 74, 74)";
-//                     status_curPass = false
-//                 } else {
-//                     error_Wrong.style.display = "none";
-//                     curPassInput.style.border = "none";
-//                     status_curPass = true
-//                 }
+                if (curPassInput.value !== passwordRec) {
+                    error_Wrong.style.display = "list-item";
+                    curPassInput.style.border = "1px solid rgb(255, 74, 74)";
+                    status_curPass = false
+                } else {
+                    error_Wrong.style.display = "none";
+                    curPassInput.style.border = "none";
+                    status_curPass = true
+                }
 
-//                 if (!checkLength(newPassInput.value)) {
-//                     error_Length.style.display = "list-item";
-//                     newPassInput.style.border = "1px solid rgb(255, 74, 74)";
-//                     status_Length = false
-//                 } else {
-//                     error_Length.style.display = "none";
-//                     newPassInput.style.border = "none";
-//                     status_Length = true
-//                 }
+                if (!checkLength(newPassInput.value)) {
+                    error_Length.style.display = "list-item";
+                    newPassInput.style.border = "1px solid rgb(255, 74, 74)";
+                    status_Length = false
+                } else {
+                    error_Length.style.display = "none";
+                    newPassInput.style.border = "none";
+                    status_Length = true
+                }
 
-//                 if (!checkCaps(newPassInput.value)) {
-//                     error_Caps.style.display = "list-item";
-//                     newPassInput.style.border = "1px solid rgb(255, 74, 74)";
-//                     status_Caps = false
-//                 } else {
-//                     error_Caps.style.display = "none";
-//                     newPassInput.style.border = "none";
-//                     status_Caps = true
-//                 }
+                if (!checkCaps(newPassInput.value)) {
+                    error_Caps.style.display = "list-item";
+                    newPassInput.style.border = "1px solid rgb(255, 74, 74)";
+                    status_Caps = false
+                } else {
+                    error_Caps.style.display = "none";
+                    newPassInput.style.border = "none";
+                    status_Caps = true
+                }
 
-//                 if (!checkLow(newPassInput.value)) {
-//                     error_Low.style.display = "list-item";
-//                     newPassInput.style.border = "1px solid rgb(255, 74, 74)";
-//                     status_Low = false
-//                 } else {
-//                     error_Low.style.display = "none";
-//                     newPassInput.style.border = "none";
-//                     status_Low = true
-//                 }
+                if (!checkLow(newPassInput.value)) {
+                    error_Low.style.display = "list-item";
+                    newPassInput.style.border = "1px solid rgb(255, 74, 74)";
+                    status_Low = false
+                } else {
+                    error_Low.style.display = "none";
+                    newPassInput.style.border = "none";
+                    status_Low = true
+                }
 
-//                 if (!checkNumber(newPassInput.value)) {
-//                     error_Num.style.display = "list-item";
-//                     newPassInput.style.border = "1px solid rgb(255, 74, 74)";
-//                     status_Num = false
-//                 } else {
-//                     error_Num.style.display = "none";
-//                     newPassInput.style.border = "none";
-//                     status_Num = true
-//                 }
+                if (!checkNumber(newPassInput.value)) {
+                    error_Num.style.display = "list-item";
+                    newPassInput.style.border = "1px solid rgb(255, 74, 74)";
+                    status_Num = false
+                } else {
+                    error_Num.style.display = "none";
+                    newPassInput.style.border = "none";
+                    status_Num = true
+                }
 
-//                 if (newPassInput.value !== newPassCfm.value) {
-//                     error_mismatch.style.display = "list-item";
-//                     newPassCfm.style.border = "1px solid rgb(255, 74, 74)";
-//                     status_newCfmPass = false
-//                 } else {
-//                     error_mismatch.style.display = "none";
-//                     newPassCfm.style.border = "none";
-//                     status_newCfmPass = true
-//                 }
+                if (newPassInput.value !== newPassCfm.value) {
+                    error_mismatch.style.display = "list-item";
+                    newPassCfm.style.border = "1px solid rgb(255, 74, 74)";
+                    status_newCfmPass = false
+                } else {
+                    error_mismatch.style.display = "none";
+                    newPassCfm.style.border = "none";
+                    status_newCfmPass = true
+                }
 
-//                 if (status_curPass && status_newCfmPass && status_Caps && status_Length && status_Low && status_Num) {
-//                     errorBox.style.display = "none";
+                if (status_curPass && status_newCfmPass && status_Caps && status_Length && status_Low && status_Num) {
+                    errorBox.style.display = "none";
 
-//                     // Update Auth password
-//                     updatePassword(user, newPassCfm.value).then(() => {
-//                         // Update successful.
+                    // Update Auth password
+                    updatePassword(user, newPassCfm.value).then(() => {
+                        // Update successful.
 
-//                         // Update database password
-//                         update(ref(DB,`Admins/${user.uid}`),{
-//                             password: newPassCfm.value
-//                         }).then(()=> {
-//                             alert(`Password has been changed \nPlease sign in again using this new password.`);
-//                             auth.signOut();
-//                         })
-//                         .catch((error) => {
-//                             // An error ocurred
-//                             alert(`ERROR ${error.code}: ${error.message}`);
-//                         });
+                        // Update database password
+                        update(ref(DB,`Admins/${user.uid}`),{
+                            password: newPassCfm.value
+                        }).then(()=> {
+                            alert(`Password has been changed \nPlease sign in again using this new password.`);
+                            auth.signOut();
+                        })
+                        .catch((error) => {
+                            // An error ocurred
+                            alert(`ERROR ${error.code}: ${error.message}`);
+                        });
                         
-//                     }).catch((error) => {
-//                         // An error ocurred
-//                         alert(`ERROR ${error.code}: ${error.message}`);
-//                     });
+                    }).catch((error) => {
+                        // An error ocurred
+                        alert(`ERROR ${error.code}: ${error.message}`);
+                    });
 
-//                 } else {
-//                     errorBox.style.display = "flex";
-//                 }
-//             })
-//             .catch((error) => {
-//                 alert(`ERROR ${error.code}: ${error.message}`);
-//             })
-//         })
-//     }
+                } else {
+                    errorBox.style.display = "flex";
+                }
+            })
+            .catch((error) => {
+                alert(`ERROR ${error.code}: ${error.message}`);
+            })
+        })
+    }
 
-//     function showDates() {
-//         const dateInput = document.querySelector("#collection-date");
-//         const manual = document.querySelector("#manual-update");
-//         const automatic = document.querySelector("#auto-update");
-//         const updateButton = document.querySelector("#update-button");
+    function showDates() {
+        const dateInput = document.querySelector("#collection-date");
+        const manual = document.querySelector("#manual-update");
+        const automatic = document.querySelector("#auto-update");
+        const updateButton = document.querySelector("#update-button");
 
-//         function resetButton(current, target) {
-//             current.classList.add('inactive');
-//             target.classList.remove('inactive');
-//         }
+        function resetButton(current, target) {
+            current.classList.add('inactive');
+            target.classList.remove('inactive');
+        }
 
-//         // get dates data
-//         get(ref(DB,"Dates/"))
-//         .then((snapshot) => {
-//             // get details
-//             const col_date = snapshot.val()["Collection"];
-//             const auto = snapshot.val()["Auto"];
-//             dateInput.value = col_date;
+        // get dates data
+        get(ref(DB,"Dates/"))
+        .then((snapshot) => {
+            // get details
+            const col_date = snapshot.val()["Collection"];
+            const auto = snapshot.val()["Auto"];
+            dateInput.value = col_date;
 
-//             if (auto) {
-//                 dateInput.disabled = true;
-//                 sessionStorage.setItem("auto-date",true);
-//                 resetButton(automatic, manual);
-//             } else {
-//                 dateInput.disabled = false;
-//                 sessionStorage.setItem("auto-date",false);
-//                 resetButton(manual, automatic);
-//             }
+            if (auto) {
+                dateInput.disabled = true;
+                sessionStorage.setItem("auto-date",true);
+                resetButton(automatic, manual);
+            } else {
+                dateInput.disabled = false;
+                sessionStorage.setItem("auto-date",false);
+                resetButton(manual, automatic);
+            }
 
-//             automatic.addEventListener('click',function() {
-//                 resetButton(automatic,manual);
-//                 dateInput.disabled = true;
-//                 sessionStorage.setItem("auto-date",true);
-//             })
+            automatic.addEventListener('click',function() {
+                resetButton(automatic,manual);
+                dateInput.disabled = true;
+                sessionStorage.setItem("auto-date",true);
+            })
 
-//             manual.addEventListener('click',function() {
-//                 resetButton(manual,automatic);
-//                 dateInput.disabled = false;
-//                 sessionStorage.setItem("auto-date",false);
-//             });
-//         })
+            manual.addEventListener('click',function() {
+                resetButton(manual,automatic);
+                dateInput.disabled = false;
+                sessionStorage.setItem("auto-date",false);
+            });
+        })
 
-//         updateButton.addEventListener('click',function() {
-//             const status = JSON.parse(sessionStorage.getItem("auto-date"));
-//             const date = dateInput.value;
+        updateButton.addEventListener('click',function() {
+            const status = JSON.parse(sessionStorage.getItem("auto-date"));
+            const date = dateInput.value;
             
-//             update(ref(DB,`Dates/`),{
-//                 Auto:status,
-//                 Collection: date
-//             })
-//             .then(()=>{
-//                 alert("Updated Successfully.")
-//             })
-//             .catch((error) => {
-//                 alert(`ERROR ${error.code}: ${error.message}`);
-//             });
-//         })
-//     }
+            update(ref(DB,`Dates/`),{
+                Auto:status,
+                Collection: date
+            })
+            .then(()=>{
+                alert("Updated Successfully.")
+            })
+            .catch((error) => {
+                alert(`ERROR ${error.code}: ${error.message}`);
+            });
+        })
+    }
 
-// }
+}
 
 // Newsletter
 try {

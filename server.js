@@ -1,9 +1,12 @@
 const express = require('express');
 const path = require('path');
-const { auth } = require('./firebaseConfig');
+const { signOut } = require('./controllers/firebase_control')
 
 const app = express();
 const PORT = 5000;
+
+require('dotenv').config();  
+// console.log(process.env);
 
 const publicDir = path.join(__dirname,'./public');
 app.use(express.static(publicDir));
@@ -16,17 +19,16 @@ app.use('/firebaseProcess',require('./routes/firebase'));
 app.use('/',require('./routes/pages'))
 
 app.get('/', (req,res) => {
-    auth.signOut();
+    signOut.signOut();
     res.render('index');
 })
 
 app.get('/paynow',(req,res) => {
-    auth.signOut();
+    signOut();
     res.render('paynow');
 })
 
 app.get('/admin/login', (req,res) => {
-    console.log("here");
     res.render('admin/login')
 })
 

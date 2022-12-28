@@ -1,10 +1,16 @@
 const { initializeApp } = require("firebase/app");
-const {getDatabase, set, get, onValue, update, remove, ref, child} = require('firebase/database');
-const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail,
-    updatePassword } = require('firebase/auth');
+const path = require('path');
+const { getDatabase, set, get, onValue, update, remove, ref, child } = require('firebase/database');
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } = require('firebase/auth');
+require('dotenv').config();
 // import {getDatabase, set, get, onValue, update, remove, ref, child} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 // import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+
+require('dotenv').config({path: path.resolve(__dirname,'.env')});
+
+// console.log(__dirname);
+// // console.log(curDir);
+// console.log(process.cwd());
 
 const firebaseConfig = {
     apiKey: "AIzaSyDsZ_OiNSr_TZKv5bEDeVmeewqqzMnPGt8",
@@ -20,6 +26,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+exports.signOut = auth;
 
 // Initialise DB from firebase
 const DB = getDatabase();
@@ -79,32 +87,61 @@ exports.paynow_control = (req,res) => {
     })
 }
 
+
 exports.auth_control = (req,res) => {
-    onAuthStateChanged(auth, (user) => {
+    console.log("auth control")
+    
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
             get(ref(DB,`Admins/${user.uid}`))
-            .then(() => {
-                console.log("logged in dashboard")
-                return res.status(200).send();
+            .then((snapshot) => {
+                if (snapshot.val()) {
+                    console.log("inside dashboard");
+                    res.status(200).json({
+                        allow:"true",
+                        id: snapshot.val()["displayName"]
+                    })
+                } else {
+                    console.log("invalid access");
+                    res.status(200).json({
+                        allow:"false",
+                        id: user.displayName
+                    })
+                }
             })
-        }
-        else {
+            .catch((error)=> {
+                console.log("ERROR:",error);
+                res.sendStatus(400);
+            })
+        } else {
             console.log("logged out dashboard")
-            return res.status(400).send();
+            res.sendStatus(400);
         }
-    })      
+    })
+    
+    unsubscribe();    
 }
 
-exports.login_control = (req, res) => {
+exports.login_control = (req,res) => {
     const { email, pass } = req.body;
-    
-    signInWithEmailAndPassword(auth, email, pass)
+
+    setPersistence(auth, browserSessionPersistence)
     .then(() => {
-        console.log("success sign in")
-        return res.status(200).send()
+        signInWithEmailAndPassword(auth, email, pass)
+        .then(() => {
+            console.log("success sign in")
+            return res.sendStatus(200)
+        })
+        .catch((error)=>{
+            console.log(error)
+            return res.sendStatus(400);
+        })
     })
-    .catch((error)=>{
-        console.log(error)
-        return res.status(404).send(error.message)
-    })
+    .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(`ERROR ${errorCode}: ${errorMessage}`);
+        return res.sendStatus(400);
+    });
 }
