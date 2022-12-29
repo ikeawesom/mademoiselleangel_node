@@ -168,9 +168,7 @@ if (curPage === "/" || curPage === "/products") {
                     // Get details
                     const title = productName;
                     const lowestPrice = productDetails["Prices"].split(";")[0].split("-")[1];
-                    // Create filename based on title
-                    const filename = title.split(" ").join("-");
-                    const filepath = `/resources/product-${filename}-1.png`;
+                    const filepath = productDetails["File"]
                     
                     // Create elements
                     const product_item = document.createElement("div");
@@ -183,11 +181,7 @@ if (curPage === "/" || curPage === "/products") {
                     const continue_button = document.createElement("i");
     
                     // Assign values
-                    if (fileExists(filepath)) {
-                        image.src = filepath;
-                    } else {
-                        image.src = 'resources/image-unavailable.png';
-                    }
+                    image.src = filepath;
     
                     title_h3.innerHTML = title;
                     price_text.innerHTML = `From ${lowestPrice}`;
@@ -363,10 +357,7 @@ if (curPage === "/" || curPage === "/products") {
                 const title = productDetails["Title"];
                 const desc = productDetails["Desc"];
                 const prices_list = productDetails["Prices"].split(";");
-                
-                // Create filename based on title
-                const filename = title.split(" ").join("-");
-                const filepath = `../resources/product-${filename}-1.png`;
+                const filepath = productDetails["File"];
     
                 // New elements
                 const product_container = document.createElement("div");
@@ -385,12 +376,7 @@ if (curPage === "/" || curPage === "/products") {
                 
                 price_title.innerHTML = "Prices:";
     
-                // check if image exists
-                if (fileExists(filepath)) {
-                    images_container.style.backgroundImage = `url(${filepath})`;
-                } else {
-                    images_container.style.backgroundImage = "url(../resources/image-unavailable.png)";
-                }
+                images_container.style.backgroundImage = `url(${filepath})`;
     
                 // Assign identities
                 product_container.classList.add("product-container");
@@ -930,12 +916,9 @@ else if (curPage === "/admin/dashboard") {
                 })
 
                 // Assign values
-                // if (fileExists(filepath)) {
                 console.log(filepath);
                 image.src = filepath;
-                // } else {
-                //     image.src = '../resources/image-unavailable.png';
-                // }
+                
                 titleElement.innerHTML = title;
                 priceElement.innerHTML = prices;
                 section_products.appendChild(newItem);
