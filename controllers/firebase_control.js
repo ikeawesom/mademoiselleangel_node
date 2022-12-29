@@ -2,8 +2,8 @@ const { initializeApp } = require("firebase/app");
 const path = require('path');
 const { getDatabase, set, get, update, remove, ref, child } = require('firebase/database');
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } = require('firebase/auth');
-// import {getDatabase, set, get, onValue, update, remove, ref, child} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
-// import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+const { getStorage, ref:sref, getDownloadURL, uploadBytes } = require('firebase/storage');
+
 
 function envs() {
     require('dotenv').config({path: path.resolve(__dirname,'.env')});
@@ -31,16 +31,21 @@ const firebaseConfig = {
     measurementId: M_ID
 };
 
-// Initialize Firebase
+// -------------- Initialize Firebase -------------- //
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const DB = getDatabase()
+const storage = getStorage(app);
+// getDownloadURL(sref(storage,"product-Chocolate-Cookies-1.png"))
+// .then((url)=>{
+//     console.log(url);
+// })
 
 exports.signOut = auth;
 
-// Initialise DB from firebase
-const DB = getDatabase();
+// -------------- Cron Scheduling -------------- //
 
-// Schedule
 var cron = require('node-cron');
 const colDates = ['10 February 2023', '10 March 2023', '7 April 2023', '5 May 2023', '2 June 2023', '30 June 2023', '28 July 2023', '25 August 2023', '22 September 2023', '20 October 2023', '17 November 2023', '15 December 2023']
 
@@ -78,6 +83,7 @@ var countdown = cron.schedule('0 0 13 1 *', ()=>{
     scheduled: false
 })
    
+// -------------- Export Routing Functions -------------- //
 
 exports.allProducts_control = (req,res) => {
     get(ref(DB,"Products/"))
@@ -528,4 +534,56 @@ exports.resetSession_control = (req,res) =>{
         console.log(error);
         res.sendStatus(400)
     })
+}
+
+exports.imageupload_control = async (req,res) => {
+    const file = req.file;
+    console.log("image upload")
+    const timestamp = Date.now();
+    const name = file.originalname.split(".")[0];
+    const type = file.originalname.split(".")[1];
+    const fileName = `${name}_${timestamp}.${type}`;
+
+    uploadBytes(sref(storage,fileName),file.buffer)
+    .then((snapshot)=>{
+        const path = snapshot.metadata.fullPath;
+        getDownloadURL(sref(storage,path))
+        .then((url)=>{
+            console.log("uploaded image");
+            res.status(200).json({durl:url})
+        })
+        .catch((error) =>{
+            res.status(400).json({code:error});
+        })
+    })
+    .catch((error)=>{
+        res.status(400).json({code:error});
+    })
+    
+}
+
+exports.sendimage_control = (req,res) => {
+    console.log("send image")
+    const { key, title } = req.query;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("logged into product")
+            update(ref(DB,`Products/${title}`),{
+                File: key
+            })
+            .then(()=>{
+                console.log("Set image file for",title)
+                res.status(200).json({status:`Added ${title}.`})
+            })
+            .catch((error) => {
+                console.log("4")
+                res.status(400).json({status:error})
+            });
+        } else {
+            console.log("1")
+            res.status(400).json({status:"Please sign in again."})
+        }
+    })
+
+    unsubscribe();
 }

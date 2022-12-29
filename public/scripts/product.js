@@ -1,5 +1,5 @@
 // Helper function
-function clearProductSession(){
+function clearProductSession() {
     sessionStorage.removeItem("title");
     sessionStorage.removeItem("desc");
     sessionStorage.removeItem("prices");
@@ -18,13 +18,23 @@ if (!sessionStorage.getItem("title")) {
         image_container.style.overflow = "hidden";
         empty_Img.style.display = "block";
         empty_Price.style.display = "block";
+
+        const file = document.querySelector("#photo-upload");
+        file.addEventListener("change",function() {
+            const reader = new FileReader();
+            reader.addEventListener('load',() => {
+                document.querySelector(".image-container").style.backgroundImage = `url(${reader.result})`
+                empty_Img.style.display = "none";
+            })
+            reader.readAsDataURL(this.files[0]);
+        });
     }
     
 } else {
-    // hide image stuff
-    const image_unavail = document.querySelector(".details.image .unavailable");
-    image_unavail.style.display = "none";
-
+    // hide upload button
+    const upload = document.querySelector(".details.image label");
+    upload.style.display = "none";
+    
     const title = sessionStorage.getItem("title");
     const desc = sessionStorage.getItem("desc");
     const prices = sessionStorage.getItem("prices");
@@ -125,8 +135,6 @@ if (sessionStorage.getItem("prices")) {
 } else {
     var prices_list = "";
 }
-
-console.log(prices_list);
 
 const addPrice_button = document.querySelector("#product #add-price-button");
 

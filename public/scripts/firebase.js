@@ -1338,6 +1338,8 @@ else if (curPage === "/admin/dashboard/product") {
     const titleInput = document.querySelector("#product-title");
     const descInput = document.querySelector("#product-desc");
     const pricesInput = document.querySelector("#product .prices .price-container")
+    const imageContainer = document.querySelector(".image-container");
+    const file = document.querySelector("#photo-upload");
 
 
     // Events
@@ -1351,6 +1353,7 @@ else if (curPage === "/admin/dashboard/product") {
         var title_status = false;
         var desc_status = false;
         var price_status = false;
+        var image_status = false;
 
         if (titleInput.value === "") {
             titleInput.style.border = "1px solid rgb(255, 74, 74)";
@@ -1376,7 +1379,29 @@ else if (curPage === "/admin/dashboard/product") {
             price_status = true;
         }
 
-        if (price_status && desc_status && title_status) {
+        if (!imageContainer.style.backgroundImage) {
+            imageContainer.style.border = "1px solid rgb(255, 74, 74)";
+            image_status = false;
+        } else {
+            imageContainer.style.border = "none";
+            image_status = true;
+        }
+
+        async function sendUrl_helper(url,title) {
+            const res = await fetch(baseURL+`sendImage/url?key=${url}&title=${title}`,{method:'GET'})
+            const data = await res.json();
+            alert(data.status);
+            window.location.href = "../dashboard"
+        }
+
+        async function uploadImage_helper(formData,title) {
+            const res = await fetch(baseURL+'imageUpload',{method: 'POST',body: formData})
+            const url = await res.json();
+            // send file to DB
+            sendUrl_helper(url.durl,title);
+        }
+
+        if (price_status && desc_status && title_status && image_status) {
             
             fetch(baseURL+"get_allProducts",{method:'GET'})
             .then((res)=>{if (res.ok){return res.json()}})
@@ -1412,15 +1437,22 @@ else if (curPage === "/admin/dashboard/product") {
                     // New Item
                     if (addItem) {
                         // Add to firebase DB
+                        // console.log(file.files[0].type, typeof file.files[0].type);
+                        
                         fetch(baseURL+`newproduct/new?title=${titleInput.value}&desc=${descInput.value}&prices=${sessionStorage.getItem("prices")}`,{method:'GET'})
                         .then((res)=>{
                             if (res.ok) {
-                                alert(`Item "${titleInput.value}" added.`);
-                                clearProductSession();
+                                // upload file to storage
+                                let formData = new FormData();
+                                formData.append("file",file.files[0]);
+                                formData.append("product",titleInput.value)
+
+                                uploadImage_helper(formData,titleInput.value);
+                                
                             }else {
-                                alert("An error has occured. Please try again later.")
+                                alert("A1n error has occured. Please try again later.")
                             }
-                            window.location.href = "../dashboard";
+                            // window.location.href = "../dashboard";
                         })
                         .catch((error)=>{
                             alert(`ERROR ${error.code}: ${error.message}`);

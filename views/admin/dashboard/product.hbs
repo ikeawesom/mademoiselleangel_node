@@ -14,7 +14,7 @@
 
     <section id="page-wrapper">
         <section id="header">
-            <h2>Welcome to your dashboard, Angel.</h2>
+            <h2></h2>
             <div class="buttons">
                 <a href="/" alt="Return to homepage" id="return-homepage">
                     <div class="button main">
@@ -74,15 +74,18 @@
 
                             <!-- Images -->
                             <div class="details image">
-                                <div class="unavailable">
-                                    <h3>Feature in development</h3>
-                                    <p>Contact Ike to add an image to your new product.</p>
-                                </div>
+                                
                                 <div class="image-container">
                                     <div class="empty">
                                         No Image Available
                                     </div>
                                 </div>
+                                <input id='photo-upload' type="file" accept="image/*" style="display: none;">
+                                <label for="photo-upload">
+                                    <div class="button">
+                                        <div class="text">Upload Image <i class="fa fa-cloud-arrow-up"></i></div>
+                                    </div>
+                                </label>
                             </div>
 
 

@@ -346,9 +346,9 @@ a {
 }
 
 /* Dates */
-#dates * {
-    /* border: 1px solid red; */
-}
+/* #dates * {
+    border: 1px solid red;
+} */
 
 @media (min-width:553px) {
     #dates .inputs {
@@ -780,6 +780,7 @@ hr {
     justify-content: flex-start;
     border-radius: 1rem 1rem 1rem 1rem;
     margin-bottom: 2rem;
+    padding: 2rem;
     /* overflow: hidden; */
 }
 
@@ -812,6 +813,18 @@ hr {
     justify-content: center;
 }
 
+.details.image label {
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#photo-upload-button {
+    margin: 1rem 0;
+}
+
+
 @media (max-width:1000px) {
     .details.image .image-container {
         width: 15rem;
@@ -828,15 +841,13 @@ hr {
     background-color: rgb(239, 239, 239);
 }
 
-.details.image .button {
-    width: 20%;
-    margin-top: 1rem;
-    background-color: var(--hover-font-color);
-    padding: 1rem 0;
+.details.image .image-container .empty  h3{
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-.details.image .button:hover {
-    opacity: 0.7;
+.details.image .image-container .empty h3:hover {
+    color: var(--hover-font-color);
 }
 
 
