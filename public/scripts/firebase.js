@@ -932,11 +932,12 @@ else if (curPage === "/admin/dashboard") {
                 })
 
                 // Assign values
-                if (fileExists(filepath)) {
+                // if (fileExists(filepath)) {
+                    console.log(filepath);
                     image.src = filepath;
-                } else {
-                    image.src = '../resources/image-unavailable.png';
-                }
+                // } else {
+                //     image.src = '../resources/image-unavailable.png';
+                // }
                 titleElement.innerHTML = title;
                 priceElement.innerHTML = prices;
                 section_products.appendChild(newItem);
