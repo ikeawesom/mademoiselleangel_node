@@ -3,17 +3,12 @@ const path = require('path');
 const { signOut } = require('./controllers/firebase_control')
 
 const app = express();
-const PORT = 5000;
-
-require('dotenv').config();  
+const PORT = process.env.PORT || 80
 
 const publicDir = path.join(__dirname,'./public');
 app.use(express.static(publicDir));
 
 app.set('view engine','hbs');
-
-const bodyParser = require('body-parser');
-const jsonParse = bodyParser.json();
 
 // --------- Backend Processes --------- //
 
