@@ -1345,6 +1345,8 @@ else if (curPage === "/admin/dashboard/product") {
     return_dash.addEventListener('click',()=>{
         window.location.href = "../dashboard";
     })
+    
+    var processing = false;
 
     save_button.addEventListener('click',()=>{
 
@@ -1400,7 +1402,7 @@ else if (curPage === "/admin/dashboard/product") {
             sendUrl_helper(url.durl,title);
         }
 
-        if (price_status && desc_status && title_status && image_status) {
+        if (price_status && desc_status && title_status && image_status && !processing) {
             
             fetch(baseURL+"get_allProducts",{method:'GET'})
             .then((res)=>{if (res.ok){return res.json()}})
@@ -1445,7 +1447,7 @@ else if (curPage === "/admin/dashboard/product") {
 
                         save_button.querySelector(".text").innerHTML = "Processing...";
                         save_button.style.opacity = "0.7";
-                        save_button.cloneNode(true)
+                        processing = true;
                         fetch(baseURL+`newproduct/new?title=${titleInput.value}&desc=${descInput.value}&prices=${sessionStorage.getItem("prices")}`,{method:'GET'})
                         .then((res)=>{
                             if (res.ok) {
