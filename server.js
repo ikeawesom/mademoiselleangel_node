@@ -3,10 +3,11 @@ const path = require('path');
 const { signOut } = require('./controllers/firebase_control')
 
 const app = express();
+app.use(express.static(__dirname,'/public'));
+
 const PORT = process.env.PORT || 80
 
-const publicDir = path.join(__dirname,'./public');
-app.use(express.static(publicDir));
+// const publicDir = path.join(__dirname,'./public');
 
 app.set('view engine','hbs');
 
