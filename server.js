@@ -6,17 +6,19 @@ const app = express();
 const PORT = 5000;
 
 require('dotenv').config();  
-// console.log(process.env);
 
 const publicDir = path.join(__dirname,'./public');
 app.use(express.static(publicDir));
 
 app.set('view engine','hbs');
 
-// Firebase processes
-app.use('/firebaseProcess',require('./routes/firebase'));
+// --------- Backend Processes --------- //
 
+app.use('/firebaseProcess',require('./routes/firebase'));
 app.use('/',require('./routes/pages'))
+app.use('/stripe',require('./routes/stripe'))
+
+// --------- Get to pages --------- //
 
 app.get('/', (req,res) => {
     signOut.signOut();
@@ -24,7 +26,7 @@ app.get('/', (req,res) => {
 })
 
 app.get('/paynow',(req,res) => {
-    signOut();
+    signOut.signOut();
     res.render('paynow');
 })
 

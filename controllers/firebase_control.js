@@ -6,7 +6,6 @@ const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onA
 // import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
 function envs() {
-    require('dotenv').config();
     require('dotenv').config({path: path.resolve(__dirname,'.env')});
     const declareEnv = (name) => {return process.env[name]}
     globalThis.API_KEY = declareEnv("FB_API_KEY");
@@ -20,7 +19,7 @@ function envs() {
 }
 
 envs();
-
+    
 const firebaseConfig = {
     apiKey: API_KEY,
     authDomain: DOMAIN,

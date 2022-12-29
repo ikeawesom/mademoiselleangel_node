@@ -1,2 +1,3 @@
 controllers/.env
 node_modules
+api/stripe/api keys.txt
