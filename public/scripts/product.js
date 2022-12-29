@@ -6,17 +6,6 @@ function clearProductSession(){
     sessionStorage.removeItem("filename");
 }
 
-function fileExists(url) {
-    if(url){
-        var req = new XMLHttpRequest();
-        req.open('GET', url, false);
-        req.send()
-        return req.status==200;
-    } else {
-        return false;
-    }
-}
-
 if (!sessionStorage.getItem("title")) {
     clearProductSession();
     if (!sessionStorage.getItem("add-item")) {
@@ -44,11 +33,8 @@ if (!sessionStorage.getItem("title")) {
     const descInput = document.querySelector("#product-desc");
     const imageContainer = document.querySelector(".image-container");
     
-    if (fileExists(`../${filename}`)) {
-        imageContainer.style.backgroundImage = `url(../${filename})`;
-    } else {
-        imageContainer.style.backgroundImage = `url(../../resources/image-unavailable.png)`;
-    }
+    imageContainer.style.backgroundImage = `url(${filename})`;
+    
     titleInput.value = title;
     descInput.value = desc;
     
@@ -277,20 +263,3 @@ addPrice_button.addEventListener('click',()=>{
         }
     }
 });
-
-// function futureDev() {
-//     const reloadButton = document.querySelector(".details.image #reload-image");
-//     const empty_Img = document.querySelector(".image-container .empty");
-    
-//     reloadButton.addEventListener('click',()=>{
-//         const titleList = document.querySelector("#product-title").value.split(" ");
-//         var filename = "product-";
-//         titleList.forEach((word) => {
-//             filename += word + "-";
-//         })
-//         filename += "1.png"
-//         console.log(filename);
-//         // var imageFile = "../../resources/"
-//     })
-//             // empty_Img.style.display = "block";
-// }

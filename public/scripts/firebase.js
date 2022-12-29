@@ -49,17 +49,6 @@ function clearProductSession(){
     sessionStorage.removeItem("add-item");
 }
 
-function fileExists(url) {
-    if(url){
-        var req = new XMLHttpRequest();
-        req.open('GET', url, false);
-        req.send()
-        return req.status==200;
-    } else {
-        return false;
-    }
-}
-
 function updateMenu(title,element,text_div) {
     fetch(baseURL+"admins", {
         method: 'POST',
@@ -96,6 +85,10 @@ function updateMenu(title,element,text_div) {
             text_div.innerHTML = "Remove from Menu";
         }
     })
+    .catch((error)=>{
+        alert("An error has occured. Please try again later.")
+        window.location.href = "login"
+    })
 }
 
 function gotoOrderPage(time,id,email,paid,order,date){
@@ -106,8 +99,6 @@ function gotoOrderPage(time,id,email,paid,order,date){
     sessionStorage.setItem("paynowItem-order",order);
     sessionStorage.setItem("paynowItem-date",date);
     window.location = "/admin/dashboard/order"
-    // const result = await res.json();
-    // if (result.status !== "true") {alert("An error has occured. Please try again later.")}
 }
 
 // ---------------------- CONNECTIONS TO BACKEND ---------------------- //
@@ -302,8 +293,7 @@ if (curPage === "/" || curPage === "/products") {
                 itemDesc.innerHTML = data[title]["Desc"];
     
                 // Create filename based on title
-                const filename = title.split(" ").join("-");
-                const filepath = `../resources/product-${filename}-1.png`;
+                const filepath = data[title]["File"]
                 itemImage.style.backgroundImage = `url(${filepath}`;
     
                 // Add options to quantity selection
@@ -916,7 +906,6 @@ else if (curPage === "/admin/dashboard") {
                 })
 
                 // Assign values
-                console.log(filepath);
                 image.src = filepath;
                 
                 titleElement.innerHTML = title;
