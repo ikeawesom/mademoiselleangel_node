@@ -874,6 +874,8 @@ else if (curPage === "/admin/dashboard") {
                 const title = value["Title"];
                 const desc = value["Desc"];
                 const priceList = value["Prices"].split(";");
+                const filepath = value["File"];
+
                 var prices = "";
                 
                 priceList.forEach((price)=>{
@@ -881,10 +883,6 @@ else if (curPage === "/admin/dashboard") {
                 })
                 
                 prices = prices.substring(0, prices.length-2);
-
-                // Create filename based on title
-                const filename = title.split(" ").join("-");
-                const filepath = `../resources/product-${filename}-1.png`;
 
                 // New element
                 const newItem = document.createElement("div");
@@ -933,8 +931,8 @@ else if (curPage === "/admin/dashboard") {
 
                 // Assign values
                 // if (fileExists(filepath)) {
-                    console.log(filepath);
-                    image.src = filepath;
+                console.log(filepath);
+                image.src = filepath;
                 // } else {
                 //     image.src = '../resources/image-unavailable.png';
                 // }
