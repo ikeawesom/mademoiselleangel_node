@@ -12,6 +12,9 @@ app.use(express.static(publicDir));
 
 app.set('view engine','hbs');
 
+const bodyParser = require('body-parser');
+const jsonParse = bodyParser.json();
+
 // --------- Backend Processes --------- //
 
 app.use('/firebaseProcess',require('./routes/firebase'));
@@ -40,6 +43,10 @@ app.get('/admin/dashboard', (req,res) => {
 
 app.get('/admin/dashboard/product', (req,res)=>{
     res.render('admin/dashboard/product')
+})
+
+app.get('/admin/dashboard/order', (req,res)=>{
+    res.render('admin/dashboard/order');
 })
 
 app.listen(PORT, ()=> {

@@ -1,7 +1,8 @@
 const express = require('express');
 const { allProducts_control, lastOrder_control,
     newsletter_control, paynow_control, login_control,
-    auth_control, admin_control, newProduct_control, resetSession_control} = require('../controllers/firebase_control');
+    auth_control, admin_control, newProduct_control,
+    resetSession_control } = require('../controllers/firebase_control');
 
 const bodyParser = require('body-parser');
 

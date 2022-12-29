@@ -98,6 +98,18 @@ function updateMenu(title,element,text_div) {
     })
 }
 
+function gotoOrderPage(time,id,email,paid,order,date){
+    sessionStorage.setItem("paynowItem-time",time);
+    sessionStorage.setItem("paynowItem-id",id);
+    sessionStorage.setItem("paynowItem-email",email);
+    sessionStorage.setItem("paynowItem-paid",paid);
+    sessionStorage.setItem("paynowItem-order",order);
+    sessionStorage.setItem("paynowItem-date",date);
+    window.location = "/admin/dashboard/order"
+    // const result = await res.json();
+    // if (result.status !== "true") {alert("An error has occured. Please try again later.")}
+}
+
 // ---------------------- CONNECTIONS TO BACKEND ---------------------- //
 
 const curPage = window.location.pathname;
@@ -768,6 +780,7 @@ else if (curPage === "/admin/dashboard") {
                     const id = orderDetailsRec["id"];
                     const email = orderDetailsRec["email"];
                     const paid = orderDetailsRec["paid"];
+                    const order = orderDetailsRec["cart"];
 
                     // New elements
                     const itemDiv = document.createElement("div");
@@ -785,7 +798,6 @@ else if (curPage === "/admin/dashboard") {
                     detailsDiv.classList.add("block-text");
 
                     timeElement.classList.add("time");
-
                     emailElement.classList.add("email");
 
                     // Assign values
@@ -793,6 +805,11 @@ else if (curPage === "/admin/dashboard") {
                     idElement.innerHTML = id;
                     emailElement.innerHTML = email;
                     paidElement.innerHTML = `SGD ${paid}`;
+
+                    // Add events
+                    idElement.addEventListener('click',function() {
+                        gotoOrderPage(time,id,email,paid,order,date);
+                    })
 
                     // Calculate total
                     total_earnings += parseInt(paid);
