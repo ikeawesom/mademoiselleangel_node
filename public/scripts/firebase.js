@@ -1437,7 +1437,10 @@ else if (curPage === "/admin/dashboard/product") {
                     if (addItem) {
                         // Add to firebase DB
                         // console.log(file.files[0].type, typeof file.files[0].type);
-                        
+                        const loadingIcon = document.querySelector("#product .buttons-product .loading-icon")
+                        const nextIcon = document.querySelector("#product .buttons-product .continue")
+                        loadingIcon.style.display = "block";
+                        nextIcon.style.display = "none";
                         fetch(baseURL+`newproduct/new?title=${titleInput.value}&desc=${descInput.value}&prices=${sessionStorage.getItem("prices")}`,{method:'GET'})
                         .then((res)=>{
                             if (res.ok) {
@@ -1450,8 +1453,9 @@ else if (curPage === "/admin/dashboard/product") {
                                 
                             }else {
                                 alert("A1n error has occured. Please try again later.")
+                                window.location.href = "../dashboard";
                             }
-                            // window.location.href = "../dashboard";
+                            
                         })
                         .catch((error)=>{
                             alert(`ERROR ${error.code}: ${error.message}`);

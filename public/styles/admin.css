@@ -824,6 +824,17 @@ hr {
     margin: 1rem 0;
 }
 
+#product .buttons-product .loading-icon {
+    animation: loading 400ms ease-in-out infinite
+}
+
+@keyframes loading {
+    from {
+        transform: rotate(0);
+    } to {
+        transform: rotate(360deg);
+    }
+}
 
 @media (max-width:1000px) {
     .details.image .image-container {
