@@ -1355,7 +1355,7 @@ else if (curPage === "/admin/dashboard/product") {
         var desc_status = false;
         var price_status = false;
         var image_status = false;
-
+        
         if (titleInput.value === "") {
             titleInput.style.border = "1px solid rgb(255, 74, 74)";
             title_status = false;
@@ -1432,7 +1432,7 @@ else if (curPage === "/admin/dashboard/product") {
                         }
                     }
                 }
-                if (loop_check) {
+                if (loop_check ) {
                     error_container.style.display = "none";
 
                     // New Item
@@ -1484,7 +1484,7 @@ else if (curPage === "/admin/dashboard/product") {
                         })
                     }    
                 } else {
-                    error_container.style.display = "block";
+                    if (!processing) {error_container.style.display = "block";}
                 }
             })
             .catch((error) => {
