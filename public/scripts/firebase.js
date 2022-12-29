@@ -1441,6 +1441,11 @@ else if (curPage === "/admin/dashboard/product") {
                         const nextIcon = document.querySelector("#product .buttons-product .continue")
                         loadingIcon.style.display = "block";
                         nextIcon.style.display = "none";
+
+
+                        save_button.querySelector(".text").innerHTML = "Processing...";
+                        save_button.style.opacity = "0.7";
+                        save_button.cloneNode(true)
                         fetch(baseURL+`newproduct/new?title=${titleInput.value}&desc=${descInput.value}&prices=${sessionStorage.getItem("prices")}`,{method:'GET'})
                         .then((res)=>{
                             if (res.ok) {
