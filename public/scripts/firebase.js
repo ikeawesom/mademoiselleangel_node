@@ -208,7 +208,6 @@ if (curPage === "/" || curPage === "/products") {
     
                     product_container.appendChild(product_item);                
                 }
-                animationIn();
                 
                 if (count === 0) {
                     const emptyBanner = document.querySelector("#menu .empty");
@@ -411,8 +410,8 @@ if (curPage === "/" || curPage === "/products") {
                 product_container.appendChild(block_text);
                 item_container.appendChild(product_container);
             }
-            animationIn();            
         }
+        animationIn();            
     }
     get_allProducts();
 }
