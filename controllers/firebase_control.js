@@ -41,6 +41,45 @@ exports.signOut = auth;
 // Initialise DB from firebase
 const DB = getDatabase();
 
+// Schedule
+var cron = require('node-cron');
+const colDates = ['10 February 2023', '10 March 2023', '7 April 2023', '5 May 2023', '2 June 2023', '30 June 2023', '28 July 2023', '25 August 2023', '22 September 2023', '20 October 2023', '17 November 2023', '15 December 2023']
+
+var index = 0;
+var day = 0;
+var task = cron.schedule(`* */24 * * *`, () =>  {
+    if (day<28) {
+        day+=1
+    }else {
+        signInWithEmailAndPassword(auth,"s@s.com","Password123")
+        .then(()=>{
+            update(ref(DB,"Dates/"),{
+                Collection: colDates[index]
+            })
+            .then(()=>{
+                index += 1
+            })
+            .catch((error)=>{
+                console.log("ERROR CHANING DATES");
+                console.log(error);
+            })
+        })
+        .catch((error)=>{
+            console.log("auth error");
+            console.log(error);
+        })
+        day = 0;
+    }
+  }, {
+    scheduled: false
+});
+var countdown = cron.schedule('0 0 13 1 *', ()=>{
+    task.start()
+},{
+    scheduled: false
+})
+   
+
 exports.allProducts_control = (req,res) => {
     get(ref(DB,"Products/"))
     .then((snapshot) => {
@@ -327,7 +366,167 @@ exports.admin_control = (req,res) => {
         
         unsubscribe(); 
     }
+    else if (option === "dates") {
+        const { auto, dateinput } = req.body;
+        if (auto) {
+            // Updating
+            signInWithEmailAndPassword(auth,"s@s.com","Password123")
+            .then(()=>{
+                const date = new Date();
+                const date_start = new Date("13 January 2023");
+
+                if (auto === "true") {
+                    update(ref(DB,`Dates/`),{
+                        Auto:auto,
+                    }).then(()=>{
+                        console.log("to auto") 
+                        if (date >= date_start) {
+                            console.log("Repeated 4 weeks task started")
+                            task.start();
+                        } else {
+                            console.log("Countdown to 13 Jan started")
+                            countdown.start();
+                        }
+                        res.sendStatus(200)
+                    })
+                    .catch((error)=>{
+                        console.log("from control: could not update")
+                        console.log(error);
+                        res.sendStatus(400);
+                    })
+                } else {
+                    update(ref(DB,`Dates/`),{
+                        Auto:auto,
+                        Collection:dateinput
+                    })
+                    .then(()=>{
+                        console.log("to man")
+                        if (date >= date_start) {
+                            console.log("Repeated 4 weeks task stopped")
+                            task.stop();
+                        } else {
+                            console.log("Countdown to 13 Jan stopped")
+                            countdown.stop();
+                        }
+                        res.sendStatus(200)                        
+                    })
+                    .catch((error)=>{
+                        console.log("in control: could not update ")
+                        console.log(error);
+                        res.sendStatus(400);
+                    })
+                    // console.log("1")
+                }
+            })
+            .catch((error)=>{
+                console.log("in control:Could not sign in")
+                console.log(error);
+                res.sendStatus(400);
+            })
+        } else {
+            // Get current date
+            get(ref(DB,"Dates/"))
+            .then((snapshot)=>{
+                res.status(200).json(snapshot.val())
+            })
+            .catch((error)=>{
+                console.log("Could not fetch date")
+                console.log(error);
+                res.sendStatus(400);
+            })
+        }
+    }
     else {
         return res.sendStatus(400);
     }
+}
+
+exports.newProduct_control = (req,res) =>{
+    // const { dynamic } = req.params;
+    const { title, desc, prices, updatestatus, deleteRec } = req.query;
+    // console.log(title, desc, prices);
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("logged into product")
+            get(ref(DB,`Admins/${user.uid}`))
+            .then((snapshot) => {
+                if (snapshot.val()) {
+                    if (updatestatus) {
+                        console.log("updating")
+                        // Update item in firebase DB
+                        update(ref(DB,`Products/${title}`),{
+                            Title: title,
+                            Desc: desc,
+                            Prices: prices
+                        })
+                        .then(()=>{
+                            console.log("Added",title,"to DB");
+                            res.sendStatus(200)
+                        })
+                        .catch((error)=>{
+                            console.log(error);
+                            res.sendStatus(400);
+                        })
+                        return
+                    }
+                    if (desc) {
+                        console.log("new")
+                        // Create new item in firebase DB
+                        set(ref(DB,`Products/${title}`),{
+                            Title: title,
+                            Desc: desc,
+                            Prices: prices
+                        })
+                        .then(()=>{
+                            console.log("Added",title,"to DB");
+                            res.sendStatus(200)
+                        })
+                        .catch((error)=>{
+                            console.log(error);
+                            res.sendStatus(400);
+                        })
+                        return
+                    }
+                    if (deleteRec) {
+                        remove(ref(DB,`Products/${deleteRec}`))
+                        .then(()=>{
+                            console.log("Deleted item:",deleteRec)
+                            res.sendStatus(200);
+                        })
+                        .catch((error)=>{
+                            console.log("Could not delete item:",deleteRec);
+                            res.sendStatus(400)
+                        })
+                        
+                    }
+                    
+                } else {
+                    console.log("in product: not admin")
+                    res.sendStatus(400);
+                }
+            })
+            .catch((error)=> {
+                console.log("ERROR:",error);
+                res.sendStatus(400);
+            })
+        } else {
+            console.log("in product:logged out dashboard")
+            res.sendStatus(400);
+        }
+    })
+    
+    unsubscribe();  
+}
+
+exports.resetSession_control = (req,res) =>{
+    auth.signOut().then(()=>{
+        console.log("Signed user out")
+        res.sendStatus(200)
+    })
+    .catch((error)=>{
+        console.log("Could not log out user")
+        console.log(error);
+        res.sendStatus(400)
+    })
 }

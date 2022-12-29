@@ -1,255 +1,4 @@
-// // Product page
-// else if (curPage.includes("/admin/dashboard/product")) {
-//     // Update products
-//     const save_button = document.querySelector("#product .heading #save-button");
-//     const del_button = document.querySelector("#product #delete-button");
-//     const error_container = document.querySelector("#product .error-container");
-//     const return_dash = document.querySelector("#product #return-button"); 
-//     var addItem = sessionStorage.getItem("add-item") === "true";
-//     // Input fields
-//     const titleInput = document.querySelector("#product-title");
-//     const descInput = document.querySelector("#product-desc");
-//     const pricesInput = document.querySelector("#product .prices .price-container")
-
-
-//     // Events
-//     return_dash.addEventListener('click',()=>{
-//         window.location.href = "../dashboard";
-//     })
-
-//     save_button.addEventListener('click',()=>{
-
-//         // Validate
-//         var title_status = false;
-//         var desc_status = false;
-//         var price_status = false;
-
-//         if (titleInput.value === "") {
-//             titleInput.style.border = "1px solid rgb(255, 74, 74)";
-//             title_status = false;
-//         } else {
-//             title_status = true;
-//             titleInput.style.border = "none";
-//         }
-
-//         if (descInput.value === "") {
-//             descInput.style.border = "1px solid rgb(255, 74, 74)";
-//             desc_status = false;
-//         } else {
-//             descInput.style.border = "none";
-//             desc_status = true;
-//         }
-
-//         if (!sessionStorage.getItem("prices")) {
-//             pricesInput.style.border = "1px solid rgb(255, 74, 74)";
-//             price_status = false;
-//         } else {
-//             pricesInput.style.border = "none";
-//             price_status = true;
-//         }
-
-//         if (price_status && desc_status && title_status) {
-            
-
-//             // Bug here
-//             get(ref(DB,"Products/"))
-//             .then((snapshot)=>{
-//                 var loop_check = true;
-//                 console.log(snapshot.val());
-//                 for (const [titleRec, detailsRec] of Object.entries(snapshot.val())) {
-
-//                     // Check if adding new item
-//                     if (addItem) {
-//                         if (titleInput.value === titleRec) {
-//                             alert("Name already exists. Please choose a different product name");
-//                             titleInput.style.border = "1px solid rgb(255, 74, 74)";
-//                             loop_check = false;
-//                             break
-//                         }
-//                     }
-//                     // Check if overlaps another current item
-//                     else {
-//                         if (sessionStorage.getItem("title") == titleRec) {
-//                             continue;
-//                         }
-//                         if (titleInput.value === titleRec) {
-//                             alert("Name already exists. Please choose a different product name");
-//                             titleInput.style.border = "1px solid rgb(255, 74, 74)";
-//                             loop_check = false;
-//                             break
-//                         }
-//                     }
-//                 }
-//                 if (loop_check) {
-//                     error_container.style.display = "none";
-
-//                     // New Item
-//                     if (addItem) {
-//                         // Add to firebase DB
-//                         set(ref(DB, `Products/${titleInput.value}`), {
-//                             Title: titleInput.value,
-//                             Desc: descInput.value,
-//                             Prices: sessionStorage.getItem("prices")
-//                         })
-//                         .then(()=> {
-//                             alert(`Item "${titleInput.value}" updated.`);
-//                             clearProductSession();
-//                             window.location.href = "../dashboard";
-//                         })
-//                         .catch((error) => {
-//                             alert(`ERROR ${error.code}: ${error.message}`);
-//                         })
-//                     } else {
-//                         // Update item in firebase DB
-//                         update(ref(DB,`Products/${titleInput.value}`), {
-//                             Title: titleInput.value,
-//                             Desc: descInput.value,
-//                             Prices: sessionStorage.getItem("prices")
-//                         })
-//                         .then(()=>{
-//                             alert(`Item "${titleInput.value}" updated.`);
-//                             clearProductSession();
-//                             window.location.href = "../dashboard";
-//                         })
-//                         .catch((error) => {
-//                             alert(`ERROR ${error.code}: ${error.message}`);
-//                         })
-
-//                     }    
-
-//                 } else {
-//                     error_container.style.display = "block";
-//                 }
-//             })
-//             .catch((error) => {
-//                 alert(`ERROR: ${error.code}: ${error.message}`);
-//             })            
-//         } else {
-//             error_container.style.display = "block";
-//         }
-//     })
-
-//     if (addItem) {
-//         del_button.classList.add("inactive");
-//     } else {
-//         titleInput.readOnly = true;
-//         titleInput.addEventListener('click',()=>{
-//             alert("Product name cannot be changed. Please create a new product instead or contact Ike for further assistance.");
-//         });
-//         del_button.addEventListener('click',()=>{
-//             if (confirm(`Are you sure you want to delete ${sessionStorage.getItem("title")}? This cannot be undone!`)) {
-//                 remove(ref(DB,`Products/${sessionStorage.getItem("title")}`))
-//                 .then(()=>{
-//                     alert(`${sessionStorage.getItem("title")} successfully removed.`);
-//                     window.location.href = "../dashboard";
-//                 })
-//                 .catch((error) => {
-//                     alert(`ERROR ${error.code}: ${error.message}`);
-//                 })
-//                 // alert('hi')
-//             }
-//         })
-//     }
-    
-
-    
-// }
-// // All Products page
-// else if (curPage.includes("/products")) {
-//     getCollection();
-//     navEffects();
-//     const item_container = document.querySelector("#content #display");
-
-//     // get products from DB
-//     get(ref(DB,'Products/'))
-//     .then((snapshot) => {
-//         const productList = snapshot.val();
-        
-//         for (const [productName, productDetails] of Object.entries(productList)) {
-
-//             // declare details
-//             const title = productDetails["Title"];
-//             const desc = productDetails["Desc"];
-//             const prices_list = productDetails["Prices"].split(";");
-            
-//             // Create filename based on title
-//             const filename = title.split(" ").join("-");
-//             const filepath = `../resources/product-${filename}-1.png`;
-
-//             // New elements
-//             const product_container = document.createElement("div");
-//             const images_container = document.createElement("div");
-//             const block_text = document.createElement("div");
-//             const details_div = document.createElement("div");
-//             const title_h3 = document.createElement("h3");
-//             const desc_p = document.createElement("p");
-//             const price_div = document.createElement("div");
-//             const price_title = document.createElement("h4");
-//             const price_ul = document.createElement("ul");
-
-//             // Assign values
-//             title_h3.innerHTML = title;
-//             desc_p.innerHTML = desc;
-            
-//             price_title.innerHTML = "Prices:";
-
-//             // check if image exists
-//             if (fileExists(filepath)) {
-//                 images_container.style.backgroundImage = `url(${filepath})`;
-//             } else {
-//                 images_container.style.backgroundImage = "url(../resources/image-unavailable.png)";
-//             }
-
-//             // Assign identities
-//             product_container.classList.add("product-container");
-//             images_container.classList.add("images-container");
-//             block_text.classList.add("block-text");
-//             details_div.classList.add("details");
-
-//             title_h3.classList.add("title");
-//             desc_p.classList.add("desc");
-
-//             price_div.classList.add("prices");
-
-//             // Add hidden animation
-//             product_container.classList.add("hidden");
-//             images_container.classList.add('hidden');
-//             block_text.classList.add('hidden');
-//             details_div.classList.add('hidden');
-//             title_h3.classList.add('hidden');
-//             desc_p.classList.add('hidden');
-//             price_div.classList.add('hidden');
-//             price_title.classList.add('hidden');
-//             price_ul.classList.add('hidden');
-
-//             // Append children
-//             details_div.appendChild(title_h3);
-//             details_div.appendChild(desc_p);
-
-//             price_div.appendChild(price_title);
-//             price_div.appendChild(price_ul);
-
-//             block_text.appendChild(details_div);
-//             block_text.appendChild(price_div);
-
-//             // Create price list
-//             prices_list.forEach((price) => {
-//                 const priceItem = document.createElement("li");
-//                 priceItem.innerHTML = price;
-//                 price_ul.appendChild(priceItem);                
-//             })
-
-//             product_container.appendChild(images_container);
-//             product_container.appendChild(block_text);
-//             item_container.appendChild(product_container);
-//         }
-//         animationIn();
-//     })
-// }
-
-// else if (curPage.includes("/cart")) {
-//     navEffects();
-// }
+console.log("Entered firebase.js")
 
 // helper functions
 function ValidateEmail(input) {
@@ -257,16 +6,20 @@ function ValidateEmail(input) {
     if (input.match(validRegex)) {return true;}
     else {return false;}
 }
+
 function resetSession() {
-    auth.signOut().then(function() {
-        alert("You will been signed out!");
-        sessionStorage.clear();
-    }).catch((error) =>{
+    fetch(baseURL+"resetSession",{method:'GET'})
+    .then((res)=>{
+        if (res.ok) {
+            alert("You will been signed out!");
+        } else {
+            alert("Could not sign out.")
+        }
+    }).catch((error)=>{
         alert("An error "+error+" occured. Please contact Ike for assistance.");
-    });  
-    onAuthStateChanged(auth ,() => {
-        window.location.href = "/";
     })
+    window.location.href = "/";
+    sessionStorage.clear();
 }
 
 function checkLength(value) {
@@ -576,12 +329,99 @@ if (curPage === "/" || curPage === "/products") {
             displayMenu();
             getCollection();
         }
+        else {
+            // Product page
+            getCollection();
+            navEffects();
+            const item_container = document.querySelector("#content #display");
+        
+            // get products from DB
+            for (const [productName, productDetails] of Object.entries(data)) {
+    
+                // declare details
+                const title = productDetails["Title"];
+                const desc = productDetails["Desc"];
+                const prices_list = productDetails["Prices"].split(";");
+                
+                // Create filename based on title
+                const filename = title.split(" ").join("-");
+                const filepath = `../resources/product-${filename}-1.png`;
+    
+                // New elements
+                const product_container = document.createElement("div");
+                const images_container = document.createElement("div");
+                const block_text = document.createElement("div");
+                const details_div = document.createElement("div");
+                const title_h3 = document.createElement("h3");
+                const desc_p = document.createElement("p");
+                const price_div = document.createElement("div");
+                const price_title = document.createElement("h4");
+                const price_ul = document.createElement("ul");
+    
+                // Assign values
+                title_h3.innerHTML = title;
+                desc_p.innerHTML = desc;
+                
+                price_title.innerHTML = "Prices:";
+    
+                // check if image exists
+                if (fileExists(filepath)) {
+                    images_container.style.backgroundImage = `url(${filepath})`;
+                } else {
+                    images_container.style.backgroundImage = "url(../resources/image-unavailable.png)";
+                }
+    
+                // Assign identities
+                product_container.classList.add("product-container");
+                images_container.classList.add("images-container");
+                block_text.classList.add("block-text");
+                details_div.classList.add("details");
+    
+                title_h3.classList.add("title");
+                desc_p.classList.add("desc");
+    
+                price_div.classList.add("prices");
+    
+                // Add hidden animation
+                product_container.classList.add("hidden");
+                images_container.classList.add('hidden');
+                block_text.classList.add('hidden');
+                details_div.classList.add('hidden');
+                title_h3.classList.add('hidden');
+                desc_p.classList.add('hidden');
+                price_div.classList.add('hidden');
+                price_title.classList.add('hidden');
+                price_ul.classList.add('hidden');
+    
+                // Append children
+                details_div.appendChild(title_h3);
+                details_div.appendChild(desc_p);
+    
+                price_div.appendChild(price_title);
+                price_div.appendChild(price_ul);
+    
+                block_text.appendChild(details_div);
+                block_text.appendChild(price_div);
+    
+                // Create price list
+                prices_list.forEach((price) => {
+                    const priceItem = document.createElement("li");
+                    priceItem.innerHTML = price;
+                    price_ul.appendChild(priceItem);                
+                })
+    
+                product_container.appendChild(images_container);
+                product_container.appendChild(block_text);
+                item_container.appendChild(product_container);
+            }
+            animationIn();            
+        }
     }
     get_allProducts();
 }
 
 // PayNow page
-if (curPage === "/paynow") {
+else if (curPage === "/paynow") {
     const agreement = document.querySelector("#agree-received");
     const buttonPay = document.querySelector("#pay-button");
     agreement.addEventListener('click',()=>{
@@ -699,7 +539,7 @@ if (curPage === "/paynow") {
 }
 
 // Log in admin page
-if (curPage === "/admin/login") {
+else if (curPage === "/admin/login") {
     
     async function authenticate() {
         // console.log("auth");
@@ -754,7 +594,7 @@ if (curPage === "/admin/login") {
     })
 }
 
-if (curPage === "/admin/dashboard") {
+else if (curPage === "/admin/dashboard") {
     // Dashboard pages
     document.body.style.visibility = "hidden";
     try {
@@ -779,7 +619,7 @@ if (curPage === "/admin/dashboard") {
                 showOrders();
                 showNewsletter();
                 showAdmin(user, uid, userEmail);
-                // showDates();
+                showDates();
             }
             else {
                 alert("You are not authorised to this page.")
@@ -1100,20 +940,9 @@ if (curPage === "/admin/dashboard") {
         }
 
         get_allProducts();
-            
         
-        // get(ref(DB,`Products/`))
-        // .then((snapshot) => {
-            
-        // })
-        // .catch((error) => {
-        //     alert(`ERROR ${error.code}: ${error.message}`);
-        // });
-
-        // Add products
         const addProduct_button = document.querySelector("#products #add-product");
         addProduct_button.addEventListener('click',()=> {
-            console.log("click");
             sessionStorage.setItem("add-item","true");
             window.location.href = "dashboard/product"
         })
@@ -1427,54 +1256,235 @@ if (curPage === "/admin/dashboard") {
             target.classList.remove('inactive');
         }
 
-        // get dates data
-        get(ref(DB,"Dates/"))
-        .then((snapshot) => {
-            // get details
-            const col_date = snapshot.val()["Collection"];
-            const auto = snapshot.val()["Auto"];
+        // Get dates data
+        fetch(baseURL+"admins",{
+            method:'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                option:"dates",
+            })
+        })
+        .then((res)=>{if (res.ok) {return res.json()}
+        })
+        .then((data)=>{
+            const col_date = data.Collection;
+            const auto = data.Auto;
+
             dateInput.value = col_date;
 
-            if (auto) {
+            if (auto === "true") {
                 dateInput.disabled = true;
-                sessionStorage.setItem("auto-date",true);
+                sessionStorage.setItem("auto-date","true");
                 resetButton(automatic, manual);
             } else {
                 dateInput.disabled = false;
-                sessionStorage.setItem("auto-date",false);
+                sessionStorage.setItem("auto-date","false");
                 resetButton(manual, automatic);
             }
-
-            automatic.addEventListener('click',function() {
-                resetButton(automatic,manual);
-                dateInput.disabled = true;
-                sessionStorage.setItem("auto-date",true);
-            })
-
-            manual.addEventListener('click',function() {
-                resetButton(manual,automatic);
-                dateInput.disabled = false;
-                sessionStorage.setItem("auto-date",false);
-            });
+        })
+        .catch((error)=>{
+            alert(error);
         })
 
+        automatic.addEventListener('click',function() {
+            resetButton(automatic,manual);
+            dateInput.disabled = true;
+            sessionStorage.setItem("auto-date","true");
+        })
+
+        manual.addEventListener('click',function() {
+            resetButton(manual,automatic);
+            dateInput.disabled = false;
+            sessionStorage.setItem("auto-date","false");
+        });
+
         updateButton.addEventListener('click',function() {
-            const status = JSON.parse(sessionStorage.getItem("auto-date"));
+            const status = sessionStorage.getItem("auto-date");
             const date = dateInput.value;
             
-            update(ref(DB,`Dates/`),{
-                Auto:status,
-                Collection: date
+            fetch(baseURL+"admins",{
+                method:'POST',
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify({
+                    option:"dates",
+                    auto:status,
+                    dateinput:date
+                })
             })
-            .then(()=>{
-                alert("Updated Successfully.")
+            .then((res)=>{
+                if (res.ok){
+                    alert("Updated Successfully.")
+                    window.location.href = "dashboard"
+                }
             })
-            .catch((error) => {
+            .catch((error)=>{
                 alert(`ERROR ${error.code}: ${error.message}`);
-            });
+            })
         })
     }
 
+}
+
+// Product page
+else if (curPage === "/admin/dashboard/product") {
+    // Update products
+    const save_button = document.querySelector("#product .heading #save-button");
+    const del_button = document.querySelector("#product #delete-button");
+    const error_container = document.querySelector("#product .error-container");
+    const return_dash = document.querySelector("#product #return-button"); 
+    var addItem = sessionStorage.getItem("add-item") === "true";
+    // Input fields
+    const titleInput = document.querySelector("#product-title");
+    const descInput = document.querySelector("#product-desc");
+    const pricesInput = document.querySelector("#product .prices .price-container")
+
+
+    // Events
+    return_dash.addEventListener('click',()=>{
+        window.location.href = "../dashboard";
+    })
+
+    save_button.addEventListener('click',()=>{
+
+        // Validate
+        var title_status = false;
+        var desc_status = false;
+        var price_status = false;
+
+        if (titleInput.value === "") {
+            titleInput.style.border = "1px solid rgb(255, 74, 74)";
+            title_status = false;
+        } else {
+            title_status = true;
+            titleInput.style.border = "none";
+        }
+
+        if (descInput.value === "") {
+            descInput.style.border = "1px solid rgb(255, 74, 74)";
+            desc_status = false;
+        } else {
+            descInput.style.border = "none";
+            desc_status = true;
+        }
+
+        if (!sessionStorage.getItem("prices")) {
+            pricesInput.style.border = "1px solid rgb(255, 74, 74)";
+            price_status = false;
+        } else {
+            pricesInput.style.border = "none";
+            price_status = true;
+        }
+
+        if (price_status && desc_status && title_status) {
+            
+            fetch(baseURL+"get_allProducts",{method:'GET'})
+            .then((res)=>{if (res.ok){return res.json()}})
+            .then((products)=>{
+                var loop_check = true;
+                for (const [titleRec, detailsRec] of Object.entries(products)) {
+
+                    // Check if adding new item
+                    if (addItem) {
+                        if (titleInput.value === titleRec) {
+                            alert("Name already exists. Please choose a different product name");
+                            titleInput.style.border = "1px solid rgb(255, 74, 74)";
+                            loop_check = false;
+                            break
+                        }
+                    }
+                    // Check if overlaps another current item
+                    else {
+                        if (sessionStorage.getItem("title") == titleRec) {
+                            continue;
+                        }
+                        if (titleInput.value === titleRec) {
+                            alert("Name already exists. Please choose a different product name");
+                            titleInput.style.border = "1px solid rgb(255, 74, 74)";
+                            loop_check = false;
+                            break
+                        }
+                    }
+                }
+                if (loop_check) {
+                    error_container.style.display = "none";
+
+                    // New Item
+                    if (addItem) {
+                        // Add to firebase DB
+                        fetch(baseURL+`newproduct/new?title=${titleInput.value}&desc=${descInput.value}&prices=${sessionStorage.getItem("prices")}`,{method:'GET'})
+                        .then((res)=>{
+                            if (res.ok) {
+                                alert(`Item "${titleInput.value}" added.`);
+                                clearProductSession();
+                            }else {
+                                alert("An error has occured. Please try again later.")
+                            }
+                            window.location.href = "../dashboard";
+                        })
+                        .catch((error)=>{
+                            alert(`ERROR ${error.code}: ${error.message}`);
+                        })
+
+                    } else {
+                        fetch(baseURL+`newproduct/new?title=${titleInput.value}&desc=${descInput.value}&prices=${sessionStorage.getItem("prices")}&updatestatus=true`,{method:'GET'})
+                        .then((res)=>{
+                            if (res.ok) {
+                                alert(`Item "${titleInput.value}" updated.`);
+                                clearProductSession();
+                            }else {
+                                alert("An error has occured. Please try again later.")
+                            }
+                            window.location.href = "../dashboard";
+                        })
+                        .catch((error)=>{
+                            alert(`ERROR ${error.code}: ${error.message}`);
+                        })
+                    }    
+                } else {
+                    error_container.style.display = "block";
+                }
+            })
+            .catch((error) => {
+                alert(`ERROR: ${error.code}: ${error.message}`);
+            })            
+        } else {
+            error_container.style.display = "block";
+        }
+    })
+
+    if (addItem) {
+        del_button.classList.add("inactive");
+    } else {
+        titleInput.readOnly = true;
+        titleInput.addEventListener('click',()=>{
+            alert("Product name cannot be changed. Please create a new product instead or contact Ike for further assistance.");
+        });
+        del_button.addEventListener('click',()=>{
+            if (confirm(`Are you sure you want to delete ${sessionStorage.getItem("title")}? This cannot be undone!`)) {
+                fetch(baseURL+`newproduct/new?deleteRec=${sessionStorage.getItem("title")}`,{method:'GET'})
+                .then((res)=>{
+                    if (res.ok) {
+                        alert(`${sessionStorage.getItem("title")} successfully removed.`);
+                    }
+                    else {
+                        alert("An error has occured. Please try again later.")
+                    }
+                    window.location.href = "../dashboard";
+                })
+                .catch((error) => {
+                    alert(`ERROR ${error.code}: ${error.message}`);
+                })
+            }
+        })
+    }   
+}
+
+else if (curPage === "/cart") {
+    navEffects();
 }
 
 // Newsletter

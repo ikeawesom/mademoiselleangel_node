@@ -36,6 +36,9 @@ app.get('/admin/dashboard', (req,res) => {
     res.render('admin/dashboard')
 })
 
+app.get('/admin/dashboard/product', (req,res)=>{
+    res.render('admin/dashboard/product')
+})
 
 app.listen(PORT, ()=> {
     console.log(`Server running on port ${PORT}`);
