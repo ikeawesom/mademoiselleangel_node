@@ -118,8 +118,17 @@ const baseURL = "/firebaseProcess/";
 async function getCollection() {
     const res = await fetch(baseURL+"lastOrder", {method:'GET'});
     const data = await res.json();
-    const collection_text = document.querySelector("#collection-date");
-    collection_text.innerHTML = data.date;
+    const ordering_text = document.querySelector("#collection-date");
+    const col_text = document.querySelector("#collection-date-2");
+    ordering_text.innerHTML = data.date;
+
+    // gets details
+    const day = data.date.split(" ")[0]
+    const month = data.date.split(" ")[1]
+    const year = data.date.split(" ")[2];
+
+    col_text.innerHTML = `Collection date starts from ${parseInt(day)+1} to ${parseInt(day)+2} ${month} ${year}`
+
 }
 
 // Main page and Products
