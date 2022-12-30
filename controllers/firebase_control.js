@@ -16,6 +16,8 @@ function envs() {
     globalThis.SID = declareEnv("FB_SID")
     globalThis.APP_I = declareEnv("FB_APP_ID")
     globalThis.M_ID = declareEnv("FB_M_ID")
+    globalThis.ADMIN = declareEnv("ADMIN")
+    globalThis.ADMIN_ = declareEnv("ADMIN_")
 }
 
 envs();
@@ -55,7 +57,7 @@ var task = cron.schedule(`* */24 * * *`, () =>  {
     if (day<28) {
         day+=1
     }else {
-        signInWithEmailAndPassword(auth,"s@s.com","Password123")
+        signInWithEmailAndPassword(auth,ADMIN,ADMIN_)
         .then(()=>{
             update(ref(DB,"Dates/"),{
                 Collection: colDates[index]
@@ -375,7 +377,7 @@ exports.admin_control = (req,res) => {
         const { auto, dateinput } = req.body;
         if (auto) {
             // Updating
-            signInWithEmailAndPassword(auth,"s@s.com","Password123")
+            signInWithEmailAndPassword(auth,ADMIN,ADMIN_)
             .then(()=>{
                 const date = new Date();
                 const date_start = new Date("13 January 2023");
