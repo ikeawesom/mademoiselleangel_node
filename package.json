@@ -19,6 +19,8 @@
     "hbs": "^4.2.0",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.2",
+    "nodemailer": "^6.8.0",
+    "nodemailer-express-handlebars": "^6.0.0",
     "nodemon": "^2.0.20",
     "stripe": "^11.5.0"
   }

@@ -14,10 +14,6 @@ exports.maintenance_control = (req,res) => {
     res.render('maintenance');
 }
 
-exports.success_control = (req,res) => {
-    res.render('success')
-}
-
 exports.paynow_control = (req,res) => {
     res.render('paynow')
 }

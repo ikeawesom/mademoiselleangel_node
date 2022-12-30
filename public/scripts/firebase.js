@@ -117,13 +117,26 @@ async function getCollection() {
     const col_text = document.querySelector("#collection-date-2");
     ordering_text.innerHTML = data.date;
 
-    // gets details
-    const day = data.date.split(" ")[0]
-    const month = data.date.split(" ")[1]
-    const year = data.date.split(" ")[2];
+    if (curPage === "/") {
+        // gets details
+        const day = data.date.split(" ")[0]
+        const month = data.date.split(" ")[1]
+        const year = data.date.split(" ")[2];
 
-    col_text.innerHTML = `Collection date starts from ${parseInt(day)+1} to ${parseInt(day)+2} ${month} ${year}`
+        col_text.innerHTML = `Collection date starts from ${parseInt(day)+1} to ${parseInt(day)+2} ${month} ${year}`
+    }
 
+}
+
+async function sendReceipt(email) {
+    const res = await fetch(`/sendEmail/email?key=${email}`)
+    const status = await res.json();
+    console.log(status);
+    if (status.status === "success") {
+        window.location.href = "/success";
+    } else {
+        alert(status.status);
+    }
 }
 
 // Main page and Products
@@ -527,18 +540,15 @@ else if (curPage === "/paynow") {
                     })
                 })
 
-                const status = await res.json();
-                console.log(status);
-                if (status.status === "success") {
-                    window.location.href = "/success";
-                } else {
-                    alert("Error");
-                }
+                sendReceipt(emailInput.value);
+                
             }
 
             add_Paynow();
         }
     }
+
+    
 }
 
 // Log in admin page
