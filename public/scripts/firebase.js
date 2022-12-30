@@ -1486,6 +1486,11 @@ else if (curPage === "/admin/dashboard/product") {
                     }    
                 } else {
                     if (!processing) {error_container.style.display = "block";}
+                    else {
+                        const text = error_container.querySelector("li");
+                        text.innerHTML = "Please wait while we are processing this product. Do NOT leave this page until this is completed."
+                        error_container.style.display = "block";
+                    }
                 }
             })
             .catch((error) => {
@@ -1493,6 +1498,11 @@ else if (curPage === "/admin/dashboard/product") {
             })            
         } else {
             if (!processing) {error_container.style.display = "block";}
+            else {
+                const text = error_container.querySelector("li");
+                text.innerHTML = "Please wait while we are processing this product. Do NOT leave this page until this is completed."
+                error_container.style.display = "block";
+            }
         }
     })
 

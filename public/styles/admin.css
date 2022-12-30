@@ -869,7 +869,7 @@ hr {
     justify-content: flex-end;
 }
 #product .error-container {
-    width: 50%;
+    width: 100%;
 }
 #product .error-container li {
     display: list-item;
