@@ -2,7 +2,7 @@ const { initializeApp } = require("firebase/app");
 const path = require('path');
 const { getDatabase, set, get, update, remove, ref, child } = require('firebase/database');
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, updateEmail, updatePassword } = require('firebase/auth');
-const { getStorage, ref:sref, getDownloadURL, uploadBytes } = require('firebase/storage');
+const { getStorage, ref:sref, getDownloadURL, uploadBytes, deleteObject  } = require('firebase/storage');
 
 
 function envs() {
@@ -494,18 +494,29 @@ exports.newProduct_control = (req,res) =>{
                         return
                     }
                     if (deleteRec) {
-                        remove(ref(DB,`Products/${deleteRec}`))
-                        .then(()=>{
-                            console.log("Deleted item:",deleteRec)
-                            res.sendStatus(200);
+                        get(ref(DB,`Products/${deleteRec}/Filename`))
+                        .then((snapshot)=>{
+                            const filename = snapshot.val();
+                            deleteObject(sref(storage, filename))
+                            .then(()=>{
+                                remove(ref(DB,`Products/${deleteRec}`))
+                                .then(()=>{
+                                    console.log("Deleted item:",deleteRec)
+                                    res.sendStatus(200);
+                                })
+                                .catch((error)=>{
+                                    console.log(error);
+                                    console.log("Could not delete item:",deleteRec);
+                                    res.sendStatus(400)
+                                })
+                            })
                         })
                         .catch((error)=>{
-                            console.log("Could not delete item:",deleteRec);
-                            res.sendStatus(400)
+                            console.log(error);
+                            console.log("Filename does not exist in DB");
+                            res.sendStatus(400);
                         })
-                        
                     }
-                    
                 } else {
                     console.log("in product: not admin")
                     res.sendStatus(400);
@@ -550,7 +561,8 @@ exports.imageupload_control = async (req,res) => {
         getDownloadURL(sref(storage,path))
         .then((url)=>{
             console.log("uploaded image");
-            res.status(200).json({durl:url})
+            console.log("filename",fileName);
+            res.status(200).json({durl:url,filename:fileName})
         })
         .catch((error) =>{
             res.status(400).json({code:error});
@@ -564,12 +576,13 @@ exports.imageupload_control = async (req,res) => {
 
 exports.sendimage_control = (req,res) => {
     console.log("send image")
-    const { key, title } = req.query;
+    const { key, title, filename } = req.query;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("logged into product")
             update(ref(DB,`Products/${title}`),{
-                File: key
+                File: key,
+                Filename: filename
             })
             .then(()=>{
                 console.log("Set image file for",title)

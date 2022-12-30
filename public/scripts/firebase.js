@@ -1395,8 +1395,8 @@ else if (curPage === "/admin/dashboard/product") {
             image_status = true;
         }
 
-        async function sendUrl_helper(url,title) {
-            const res = await fetch(baseURL+`sendImage/url?key=${url}&title=${title}`,{method:'GET'})
+        async function sendUrl_helper(url,title,filename) {
+            const res = await fetch(baseURL+`sendImage/url?key=${url}&title=${title}&filename=${filename}`,{method:'GET'})
             const data = await res.json();
             alert(data.status);
             window.location.href = "../dashboard"
@@ -1406,7 +1406,7 @@ else if (curPage === "/admin/dashboard/product") {
             const res = await fetch(baseURL+'imageUpload',{method: 'POST',body: formData})
             const url = await res.json();
             // send file to DB
-            sendUrl_helper(url.durl,title);
+            sendUrl_helper(url.durl,title,url.filename);
         }
 
         if (price_status && desc_status && title_status && image_status && !processing) {
