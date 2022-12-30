@@ -101,6 +101,10 @@ function gotoOrderPage(time,id,email,paid,order,date){
     window.location = "/admin/dashboard/order"
 }
 
+function numCheck(str) {
+    return /^\d+$/.test(str);
+}
+
 // ---------------------- CONNECTIONS TO BACKEND ---------------------- //
 
 const curPage = window.location.pathname;
@@ -307,8 +311,11 @@ if (curPage === "/" || curPage === "/products") {
                 // Cart
                 const itemAddCart = itemBanner.querySelector(".order");
                 itemAddCart.addEventListener('click', function() {
-                    addToCart(title, itemPrices.value, itemQuantity.value);
-                    showCartPopup();
+                    if (numCheck(itemQuantity.value)) {
+                        addToCart(title, itemPrices.value, itemQuantity.value);
+                        showCartPopup();
+                    } else {
+                        alert("Please enter a valid quantity.")                    }
                 });
     
                 // Handle exit banner events
