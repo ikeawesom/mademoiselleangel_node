@@ -1535,11 +1535,15 @@ else if (curPage === "/admin/dashboard/product") {
             if (!deleting) {
             if (confirm(`Are you sure you want to delete ${sessionStorage.getItem("title")}? This cannot be undone!`)) {
                 deleting = true;
+                // animations
                 const loadingIcon = document.querySelectorAll("#product .buttons-product .loading-icon")[0];
                 const delText = del_button.querySelector(".text")
+                const trashIcon = document.querySelector("#product .buttons-product .fa-trash");
+                trashIcon.style.display = "none"
                 delText.innerHTML = "Deleting..."
                 loadingIcon.style.display = "block";
                 del_button.style.opacity = "0.6";
+
                 fetch(baseURL+`newproduct/new?deleteRec=${sessionStorage.getItem("title")}`,{method:'GET'})
                 .then((res)=>{
                     if (res.ok) {
