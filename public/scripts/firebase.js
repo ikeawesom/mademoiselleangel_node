@@ -1456,7 +1456,7 @@ else if (curPage === "/admin/dashboard/product") {
                     if (addItem) {
                         // Add to firebase DB
                         // console.log(file.files[0].type, typeof file.files[0].type);
-                        const loadingIcon = document.querySelector("#product .buttons-product .loading-icon")
+                        const loadingIcon = document.querySelectorAll("#product .buttons-product .loading-icon")[1]
                         const nextIcon = document.querySelector("#product .buttons-product .continue")
                         loadingIcon.style.display = "block";
                         nextIcon.style.display = "none";
@@ -1526,12 +1526,20 @@ else if (curPage === "/admin/dashboard/product") {
     if (addItem) {
         del_button.classList.add("inactive");
     } else {
+        var deleting = false;
         titleInput.readOnly = true;
         titleInput.addEventListener('click',()=>{
             alert("Product name cannot be changed. Please create a new product instead or contact Ike for further assistance.");
         });
         del_button.addEventListener('click',()=>{
+            if (!deleting) {
             if (confirm(`Are you sure you want to delete ${sessionStorage.getItem("title")}? This cannot be undone!`)) {
+                deleting = true;
+                const loadingIcon = document.querySelectorAll("#product .buttons-product .loading-icon")[0];
+                const delText = del_button.querySelector(".text")
+                delText.innerHTML = "Deleting..."
+                loadingIcon.style.display = "block";
+                del_button.style.opacity = "0.6";
                 fetch(baseURL+`newproduct/new?deleteRec=${sessionStorage.getItem("title")}`,{method:'GET'})
                 .then((res)=>{
                     if (res.ok) {
@@ -1545,6 +1553,9 @@ else if (curPage === "/admin/dashboard/product") {
                 .catch((error) => {
                     alert(`ERROR ${error.code}: ${error.message}`);
                 })
+            } else {
+                deleting = false;
+            }
             }
         })
     }   
