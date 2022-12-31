@@ -1543,6 +1543,7 @@ else if (curPage === "/admin/dashboard/product") {
                 delText.innerHTML = "Deleting..."
                 loadingIcon.style.display = "block";
                 del_button.style.opacity = "0.6";
+                del_button.style.cursor = "default"
 
                 fetch(baseURL+`newproduct/new?deleteRec=${sessionStorage.getItem("title")}`,{method:'GET'})
                 .then((res)=>{
