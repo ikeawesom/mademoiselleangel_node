@@ -938,9 +938,9 @@ a, .selected {
         }
 
         #item .popup {
-            height: 70vh;
+            height: 80vw;
             padding-bottom: 0;
-            width: 60%;
+            width: 90vw;
             border-radius: 1rem;
             padding: 1rem;
         }
