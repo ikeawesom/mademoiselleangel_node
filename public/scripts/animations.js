@@ -65,11 +65,11 @@ const navEffects = () => {
                 linkA.style.animation = `fade-in 0.3s ease ${index / 7 + 0.5}s forwards`;
             }
             linkA.addEventListener('click',function() {
-                navBar.classList.toggle('active');
+                navBar.classList.remove('active');
                 navLinksA.forEach((link)=>{
-                    link.classList.toggle('animated');
+                    link.classList.remove('animated');
                 })
-                hamburger.classList.toggle("toggle");
+                hamburger.classList.remove("toggle");
             })
             linkA.classList.toggle("animated")
         })
