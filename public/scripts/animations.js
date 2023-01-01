@@ -59,10 +59,10 @@ const navEffects = () => {
                 setTimeout(() => {
                     linkA.style.animation = '';
                     activeNav.style.animation = ``;
-                    console.log("removed animation")                   
+                    // console.log("removed animation")                   
                 }, 300);
             } else {
-                console.log("here");
+                // console.log("here");
                 linkA.style.animation = `fade-in 0.3s ease ${index / 7 + 0.5}s forwards`;
             }
             linkA.addEventListener('click',function() {
