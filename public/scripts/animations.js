@@ -62,13 +62,18 @@ const navEffects = () => {
                     console.log("removed animation")                   
                 }, 300);
             } else {
+                console.log("here");
                 linkA.style.animation = `fade-in 0.3s ease ${index / 7 + 0.5}s forwards`;
             }
             linkA.addEventListener('click',function() {
                 navBar.classList.remove('active');
                 navLinksA.forEach((link)=>{
-                    link.classList.remove('animated');
+                    setTimeout(() => {
+                        link.classList.remove('animated');
+                        link.style.animation = '';
+                    }, 300);
                 })
+                activeNav.style.animation = ``;
                 hamburger.classList.remove("toggle");
             })
             linkA.classList.toggle("animated")
