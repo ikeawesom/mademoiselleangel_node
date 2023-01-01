@@ -49,18 +49,34 @@ const navEffects = () => {
     // Hamburger
     const hamburger = document.querySelector("#hamburger");
     const navBar = document.querySelector("#navbar");
-    const navLinksA = document.querySelectorAll(".nav-item li");
+    const navLinksA = document.querySelectorAll("#navbar li a");
     
     hamburger.addEventListener('click', () => {
         navBar.classList.toggle("active");
         navLinksA.forEach((linkA, index) => {
-            if (linkA.style.animation) {
-                linkA.style.animation = '';
+            // console.log(linkA);
+            if (linkA.classList.contains("animated")) {
+                setTimeout(() => {
+                    linkA.style.animation = '';
+                    activeNav.style.animation = ``;
+                    console.log("removed animation")                   
+                }, 300);
             } else {
-                linkA.style.animation = `fade-right 0.3s ease ${index / 7 + 2}s;`
+                linkA.style.animation = `fade-in 0.3s ease ${index / 7 + 0.5}s forwards`;
             }
+            linkA.addEventListener('click',function() {
+                navBar.classList.toggle('active');
+                navLinksA.forEach((link)=>{
+                    link.classList.toggle('animated');
+                })
+                hamburger.classList.toggle("toggle");
+            })
+            linkA.classList.toggle("animated")
         })
-    
+
+        activeNav.style.animation = `fade-in 0.3s ease 1.5s forwards`;
+        
+
         hamburger.classList.toggle("toggle");
     });  
 }
@@ -181,10 +197,10 @@ const scrollAnimation = () => {
                             absolute:true,
                             ease: 'elastic.out(0.5,0.5)'
                         });
-                        navHome.style = "color: rgb(0, 0, 105)";
-                        navMenu.style = "color: rgb(75, 75, 223)";
-                        navAbout.style = "color: rgb(0, 0, 105)";
-                        navOrdering.style = "color: rgb(0, 0, 105)";
+                        navHome.style.color = "rgb(0, 0, 105)";
+                        navMenu.style.color = "rgb(75, 75, 223)";
+                        navAbout.style.color = "rgb(0, 0, 105)";
+                        navOrdering.style.color = "rgb(0, 0, 105)";
 
                     }
                     else if (top >=vh(185)) {
@@ -194,10 +210,10 @@ const scrollAnimation = () => {
                             absolute:true,
                             ease: 'elastic.out(0.5,0.5)'
                         });
-                        navHome.style = "color: rgb(0, 0, 105)";
-                        navOrdering.style = "color: rgb(75, 75, 223)";
-                        navAbout.style = "color: rgb(0, 0, 105)";
-                        navMenu.style = "color: rgb(0, 0, 105)";
+                        navHome.style.color = "rgb(0, 0, 105)";
+                        navOrdering.style.color = "rgb(75, 75, 223)";
+                        navAbout.style.color = "rgb(0, 0, 105)";
+                        navMenu.style.color = "rgb(0, 0, 105)";
                     }
                     else if (top >= vh(90)) {
                         navAbout.appendChild(activeNav);
@@ -206,10 +222,10 @@ const scrollAnimation = () => {
                             absolute:true,
                             ease: 'elastic.out(0.5,0.5)'
                         });
-                        navHome.style = "color: rgb(0, 0, 105)";
-                        navAbout.style = "color: rgb(75, 75, 223)";
-                        navMenu.style = "color: rgb(0, 0, 105)";
-                        navOrdering.style = "color: rgb(0, 0, 105)";
+                        navHome.style.color = "rgb(0, 0, 105)";
+                        navAbout.style.color = "rgb(75, 75, 223)";
+                        navMenu.style.color = "rgb(0, 0, 105)";
+                        navOrdering.style.color = "rgb(0, 0, 105)";
                     } else {
                         navHome.appendChild(activeNav);
                         Flip.from(state, {
@@ -217,10 +233,10 @@ const scrollAnimation = () => {
                             absolute:true,
                             ease: 'elastic.out(0.5,0.5)'
                         });
-                        navAbout.style = "color: rgb(0, 0, 105)";
-                        navHome.style = "color: rgb(75, 75, 223)";
-                        navMenu.style = "color: rgb(0, 0, 105)";
-                        navOrdering.style = "color: rgb(0, 0, 105)";
+                        navAbout.style.color = "rgb(0, 0, 105)";
+                        navHome.style.color = "rgb(75, 75, 223)";
+                        navMenu.style.color = "rgb(0, 0, 105)";
+                        navOrdering.style.color = "rgb(0, 0, 105)";
                     }
                 }
             }

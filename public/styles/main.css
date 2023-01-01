@@ -169,27 +169,35 @@ a, .selected {
     }
 
     @media (max-width:1200px) {
-        #header ul li a {
-            font-size: 1.8rem;
-            line-height: 0.8rem;
+        .active-nav { 
+            opacity: 0;
         }
+        #header ul li a {
+            font-size: 1.3rem;
+            line-height: 0.8rem;
+            opacity: 0;
+        }
+
         #header {
+            animation: none;
             opacity: 0.9;
         }
         #navbar {
+            opacity: 1;
             list-style: none;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
+            padding: 5vh 2vw;
             justify-content: flex-start;
             position: fixed;
             top:10vh;
             right: 0;
-            width: 80%;
+            width: 100%;
             min-height: 100vh;
             background-color: rgb(253, 253, 255);
             box-shadow: 0 40px 60px rgba(0,0,0,0.1);
-            padding: 3em 0 0 2em;
+            /* padding: 3em 0 0 2em; */
             gap: 5em;
             transition: 0.4s ease-in;
             transform: translateX(100%);
