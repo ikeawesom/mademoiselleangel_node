@@ -1641,60 +1641,40 @@ function vh(percent) {
     return (percent * h) / 100;
 }
 
-// -- Main Functions -- //
 // Navigation Bar Effects
 function navEffects() {
-    var clicked = false; // fixes line bouncing bug
-    gsap.registerPlugin(Flip);
-    const navLinks = document.querySelectorAll(".nav-item li a");
-    const activeNav = document.querySelector(".active-nav");
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            clicked = true; // fixes line bouncing bug
-            
-            // Turn navs blue
-            gsap.to(navLinks, {color:"rgb(0, 0, 105)"});
-            if (document.activeElement === link) {
-                gsap.to(link, {color: "rgb(75, 75, 223)"});
-            }
-            
-            // Move line
-            const state = Flip.getState(activeNav);
-            link.appendChild(activeNav);
-            Flip.from(state, {
-                duration:0.5,
-                absolute:true,
-                ease: 'elastic.out(0.5,0.5)'
-            });
-
-            setTimeout(() => {
-                clicked = false;
-            }, 1000); // fixes line bouncing bug
-        });
-        link.addEventListener('mouseover', ()=> {
-            link.style.color = "rgb(75, 75, 223)";
-        })
-        link.addEventListener('mouseout', () => {
-            link.style.color = "rgb(0, 0, 105)";
-        })
-    });
-    
+   
     // Hamburger
     const hamburger = document.querySelector("#hamburger");
     const navBar = document.querySelector("#navbar");
-    const navLinksA = document.querySelectorAll(".nav-item li");
+    const navLinksA = document.querySelectorAll("#navbar li a");
     
     hamburger.addEventListener('click', () => {
         navBar.classList.toggle("active");
         navLinksA.forEach((linkA, index) => {
-            if (linkA.style.animation) {
-                linkA.style.animation = '';
+            
+            if (linkA.classList.contains("animated")) {
+                setTimeout(() => {
+                    linkA.style.animation = '';
+                    // console.log("removed animation")                   
+                }, 300);
             } else {
-                linkA.style.animation = `fade-right 0.3s ease ${index / 7 + 2}s;`
+                // console.log("here");
+                linkA.style.animation = `fade-in 0.3s ease ${index / 7 + 0.5}s forwards`;
             }
+            linkA.addEventListener('click',function() {
+                navBar.classList.remove('active');
+                navLinksA.forEach((link)=>{
+                    setTimeout(() => {
+                        link.classList.remove('animated');
+                        link.style.animation = '';
+                    }, 300);
+                })
+                hamburger.classList.remove("toggle");
+            })
+            linkA.classList.toggle("animated")
         })
-    
+
         hamburger.classList.toggle("toggle");
     });  
 }
