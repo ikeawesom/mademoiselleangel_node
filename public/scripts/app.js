@@ -37,10 +37,7 @@ if (cartPage) {
         }
     }
 
-    // Function to remove items from local storage
-    // and animate item removal from table
-    function remItemStorage(table, row, div, title, pack) {
-        
+    function processItems(table, row, div, title, pack, status) {
         const totalPriceValue = table.querySelector(".total-price-row .total-price-value");        
 
         const storeName = `${title};${pack}`;
@@ -50,36 +47,73 @@ if (cartPage) {
         var curQuantity = cartItems[storeName][0];
         const basePrice = cartItems[storeName][1];
 
-        totalPrice -= basePrice;
-        curQuantity -= 1;
+        if (status) {
+            totalPrice += basePrice;
+            curQuantity += 1;
 
-        totalPriceValue.innerHTML = `$${totalPrice}`;
-
-        if (curQuantity == 0) {
-            div.style.animation = "fade-out-right 400ms forwards";
-            
-            delete cartItems[storeName];
-            setTimeout(() => {
-                table.removeChild(row);
-                const numRows = table.querySelectorAll("tr");                
-                if (numRows.length == 2) {emptyCart();}
-            }, 500);
-            
-        } else {
             row.querySelector(".quantity-number").innerHTML = curQuantity;
             row.querySelector(".price").innerHTML = `$${curQuantity * basePrice}`;
-            row.classList.add("remove-item");
+            row.classList.add("add-item");
             setTimeout(() => {
-                row.classList.remove("remove-item");
+                row.classList.remove("add-item");
             }, 500);
+
             const newArr = [curQuantity, basePrice];
             cartItems[storeName] = newArr;
+
+            // Function to add item to local storage
+        } else {
+            // Function to remove items from local storage
+            // and animate item removal from table
+
+            totalPrice -= basePrice;
+            curQuantity -= 1;
+
+            if (curQuantity == 0) {
+                div.style.animation = "fade-out-right 400ms forwards";
+                
+                delete cartItems[storeName];
+                setTimeout(() => {
+                    table.removeChild(row);
+                    const numRows = table.querySelectorAll("tr");                
+                    if (numRows.length == 2) {emptyCart();}
+                }, 500);
+                
+            } else {
+                row.querySelector(".quantity-number").innerHTML = curQuantity;
+                row.querySelector(".price").innerHTML = `$${curQuantity * basePrice}`;
+                row.classList.add("remove-item");
+                setTimeout(() => {
+                    row.classList.remove("remove-item");
+                }, 500);
+                const newArr = [curQuantity, basePrice];
+                cartItems[storeName] = newArr;
+            }
         }
         
+        totalPriceValue.innerHTML = `$${totalPrice}`;
         localStorage.setItem("totalPrice",JSON.stringify(totalPrice));
         localStorage.setItem("cartItems",JSON.stringify(cartItems));
-        // console.log(JSON.parse(localStorage.getItem("cartItems")));        
+        // console.log(JSON.parse(localStorage.getItem("cartItems"))); 
     }
+    
+    // function addItemStorage(title, pack) {
+        
+    // }
+    
+    // function remItemStorage(table, row, div, title, pack) {
+        
+    //     const totalPriceValue = table.querySelector(".total-price-row .total-price-value");        
+
+    //     const storeName = `${title};${pack}`;
+    //     const cartItems = JSON.parse(localStorage.getItem("cartItems"));
+    //     var totalPrice = JSON.parse(localStorage.getItem("totalPrice"));
+
+    //     var curQuantity = cartItems[storeName][0];
+    //     const basePrice = cartItems[storeName][1];
+
+               
+    // }
 
     // Declaring elements
     const cartTable = document.querySelector("#cartData .cart.table");
@@ -100,7 +134,10 @@ if (cartPage) {
         const quantityDiv = document.createElement("div");
         const quantityNumDiv = document.createElement("div");
         const remButton = document.createElement("i");
+        const addButton = document.createElement("i");
+        const remAddDiv = document.createElement("div");
         const remDiv = document.createElement("div");
+        const addDiv = document.createElement("div");
         const price_td = document.createElement("td");
         
         count += 1
@@ -119,13 +156,17 @@ if (cartPage) {
         totalPrice += price;
 
         // Assign identification/data for JS
-        remDiv.classList.add("rem-div");
+        remDiv.classList.add("rem-div","addrem-div");
+        addDiv.classList.add("add-div","addrem-div");
+
+        remAddDiv.classList.add("button-div");
+
         quantityDiv.classList.add("quantity-item");
         quantityNumDiv.classList.add("quantity-number");
 
-        remButton.classList.add("fa");
-        remButton.classList.add("fa-x");
-        remButton.classList.add("table-icon");
+        remButton.classList.add("fa","fa-x","table-icon");
+
+        addButton.classList.add("fa", "fa-plus","table-icon");
 
         price_td.classList.add("price");
 
@@ -133,14 +174,23 @@ if (cartPage) {
         
         // Add click events
         remDiv.addEventListener('click',function() {
-            remItemStorage(cartTable, tempRow, quantityDiv, title, pack);
+            processItems(cartTable, tempRow, quantityDiv, title, pack, false)
+            // remItemStorage(cartTable, tempRow, quantityDiv, title, pack);
         });
+
+        addDiv.addEventListener('click',function() {
+            processItems(cartTable, tempRow, quantityDiv, title, pack, true)
+        })
 
         // Append children
         remDiv.appendChild(remButton);
+        addDiv.appendChild(addButton);
+        remAddDiv.appendChild(addDiv);
+        remAddDiv.appendChild(remDiv);
+        
         quantity_td.appendChild(quantityDiv);
         quantityDiv.appendChild(quantityNumDiv);
-        quantityDiv.appendChild(remDiv);
+        quantityDiv.appendChild(remAddDiv);
 
         tempRow.appendChild(name_td);
         tempRow.appendChild(pack_td);

@@ -43,7 +43,7 @@ const itemPrice = {
 exports.get_StripeSession = async (req,res) => {
     var cartArr = []
     const { cart } = req.body;
-    console.log(cart);
+    
     if (!cart) {
         res.sendStatus(400)
         return
@@ -64,8 +64,7 @@ exports.get_StripeSession = async (req,res) => {
         mode: 'payment',
         payment_method_types: ['card'],
         success_url: `${DOMAIN}/success`,
-        cancel_url: `${DOMAIN}/cart`,
-        automatic_tax: {enabled: true},
+        cancel_url: `${DOMAIN}/cart`
       });
     
       res.status(200).json({url:session.url});
