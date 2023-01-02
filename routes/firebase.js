@@ -2,7 +2,8 @@ const express = require('express');
 const { allProducts_control, lastOrder_control,
     newsletter_control, paynow_control, login_control,
     auth_control, admin_control, newProduct_control,
-    resetSession_control, imageupload_control, sendimage_control } = require('../controllers/firebase_control');
+    resetSession_control, imageupload_control, sendimage_control,
+    order_control } = require('../controllers/firebase_control');
 
 const multer  = require('multer')
 const upload = multer()
@@ -23,5 +24,6 @@ router.get('/newproduct/:dynamic',newProduct_control);
 router.get('/resetSession',resetSession_control);
 router.post('/imageUpload',upload.single('file'),imageupload_control);
 router.get('/sendImage/:dynamic',sendimage_control);
+router.post('/confirmOrder',jsonParse,order_control);
 
 module.exports = router;

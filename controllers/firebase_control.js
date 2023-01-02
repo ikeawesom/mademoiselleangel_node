@@ -124,15 +124,16 @@ exports.newsletter_control = (req,res) => {
 }
 
 exports.paynow_control = (req,res) => {
-    const { curDay, curTime, email, id, cart, paid } = req.body;
+    const { curDay, curTime, email, id, cart, paid, confirmed } = req.body;
     if (!curDay) {
         return res.status(400).json({status:"failed"});
     }
-    set(ref(DB,`paynowOrders/${curDay}/${curTime}`), {
+    set(ref(DB,`paynowOrders/${curDay}/${curTime}/${id}`), {
         email: email,
         id: id,
         cart: cart,
-        paid: paid
+        paid: paid,
+        confirmed: confirmed
     })
     .then(()=> {
         return res.status(200).json({status:"success"});
@@ -601,4 +602,17 @@ exports.sendimage_control = (req,res) => {
     })
 
     unsubscribe();
+}
+
+exports.order_control = (req, res) => {
+    const { date, time, id } = req.body;
+    update(ref(DB,`paynowOrders/${date}/${time}/${id}`),{
+        confirmed: "true"
+    })
+    .then(()=>{
+        res.status(200).json({result:true})
+    })
+    .catch((error)=>{
+        res.status(400).json({result:error});
+    })
 }

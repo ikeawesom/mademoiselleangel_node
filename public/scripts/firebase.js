@@ -105,11 +105,6 @@ function numCheck(str) {
     return /^\d+$/.test(str);
 }
 
-// ---------------------- CONNECTIONS TO BACKEND ---------------------- //
-
-const curPage = window.location.pathname;
-const baseURL = "/firebaseProcess/";
-
 async function getCollection() {
     const res = await fetch(baseURL+"lastOrder", {method:'GET'});
     const data = await res.json();
@@ -134,10 +129,47 @@ async function sendReceipt(email) {
     console.log(status);
     if (status.status === "success") {
         window.location.href = "/success";
+        localStorage.removeItem("cartCount");
     } else {
         alert(status.status);
     }
 }
+
+async function confirmOrder(date,time,id,itemDiv,paidElement,paid) {
+    const res = await fetch(baseURL+"confirmOrder",{
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/json'
+        },
+        body: JSON.stringify({
+            date:date,
+            time:time,
+            id:id,
+        })
+    })
+    const result = await res.json();
+    if (result.result === true) {
+        itemDiv.style.transition = '0.4s'
+        paidElement.style.transition = '0.4s'
+        itemDiv.classList.remove("not-confirmed")
+        paidElement.classList.add("confirm");
+        setTimeout(() => {
+            itemDiv.style.transition = '0s'
+            paidElement.style.transition = '0s'
+        }, 1000);
+        
+        paidElement.innerHTML = `Order Confirmed: SGD ${paid}`
+        
+    } else {
+        alert(`An error has occured: ${result.result}. \n\nPlease try again later.`)
+    }
+}
+
+// ---------------------- CONNECTIONS TO BACKEND ---------------------- //
+
+const curPage = window.location.pathname;
+const baseURL = "/firebaseProcess/";
+
 
 // Main page and Products
 if (curPage === "/" || curPage === "/products") {
@@ -536,7 +568,8 @@ else if (curPage === "/paynow") {
                         email: emailInput.value,
                         id: paynowInput.value,
                         cart: cartString,
-                        paid: localStorage.getItem("totalPrice")
+                        paid: localStorage.getItem("totalPrice"),
+                        confirmed: "false"
                     })
                 })
 
@@ -773,57 +806,74 @@ else if (curPage === "/admin/dashboard") {
                 section_orders.appendChild(dateElement);
 
                 // Iterate through orders on particular date
-                for (const [orderTimeRec, orderDetailsRec] of Object.entries(ordersOnDate)) {
+                for (const [orderTimeRec, orderDetails] of Object.entries(ordersOnDate)) {
                     orderCountDate += 1;
 
-                    // Details
-                    const time = orderTimeRec;
-                    const id = orderDetailsRec["id"];
-                    const email = orderDetailsRec["email"];
-                    const paid = orderDetailsRec["paid"];
-                    const order = orderDetailsRec["cart"];
+                    // Iterate through orders on particular time
+                    for (const [orderID, orderDetailsRec] of Object.entries(orderDetails)) {
+                        // Details
+                        const time = orderTimeRec;
+                        const id = orderID;
+                        const email = orderDetailsRec["email"];
+                        const paid = orderDetailsRec["paid"];
+                        const order = orderDetailsRec["cart"];
+                        const confirmed = orderDetailsRec["confirmed"];
 
-                    // New elements
-                    const itemDiv = document.createElement("div");
-                        const detailsDiv = document.createElement("div");
-                            const timeElement = document.createElement("p");
-                            const idElement = document.createElement("h4");
-                            const emailElement = document.createElement("p");
-                        const paidElement = document.createElement("h4");
+                        // New elements
+                        const itemDiv = document.createElement("div");
+                            const detailsDiv = document.createElement("div");
+                                const timeElement = document.createElement("p");
+                                const idElement = document.createElement("h4");
+                                const emailElement = document.createElement("p");
+                            const paidElement = document.createElement("h4");
 
-                    // Assign identities
-                    itemDiv.classList.add("container");
-                    itemDiv.classList.add("item");
-                    itemDiv.classList.add("orders");
+                        // Assign identities
+                        itemDiv.classList.add("container","item","orders");
 
-                    detailsDiv.classList.add("block-text");
+                        if (confirmed === "false") {
+                            itemDiv.classList.add("not-confirmed");
+                            paidElement.innerHTML = "Confirm Order";
+                            paidElement.addEventListener('click',function() {
+                                confirmOrder(date,time,id,itemDiv,paidElement,paid)
+                            })
+                        } else {
+                            paidElement.innerHTML = `Order Confirmed: SGD ${paid}`;
+                            paidElement.classList.add('confirm')
+                        }
+                        
+                        paidElement.classList.add("paid-element")
+                        detailsDiv.classList.add("block-text");
 
-                    timeElement.classList.add("time");
-                    emailElement.classList.add("email");
+                        timeElement.classList.add("time");
+                        emailElement.classList.add("email");
 
-                    // Assign values
-                    timeElement.innerHTML = time;
-                    idElement.innerHTML = id;
-                    emailElement.innerHTML = email;
-                    paidElement.innerHTML = `SGD ${paid}`;
+                        // Assign values
+                        timeElement.innerHTML = time;
+                        idElement.innerHTML = id;
+                        emailElement.innerHTML = email;
 
-                    // Add events
-                    idElement.addEventListener('click',function() {
-                        gotoOrderPage(time,id,email,paid,order,date);
-                    })
+                        // paidElement.innerHTML = `SGD ${paid}`;
 
-                    // Calculate total
-                    total_earnings += parseInt(paid);
+                        // Add events
+                        idElement.addEventListener('click',function() {
+                            gotoOrderPage(time,id,email,paid,order,date);
+                        })
 
-                    // Append children
-                    detailsDiv.appendChild(timeElement);
-                    detailsDiv.appendChild(idElement);
-                    detailsDiv.appendChild(emailElement);
+                        // Calculate total
+                        total_earnings += parseInt(paid);
 
-                    itemDiv.appendChild(detailsDiv);
-                    itemDiv.appendChild(paidElement);
+                        // Append children
+                        detailsDiv.appendChild(timeElement);
+                        detailsDiv.appendChild(idElement);
+                        detailsDiv.appendChild(emailElement);
 
-                    section_orders.appendChild(itemDiv);
+                        itemDiv.appendChild(detailsDiv);
+                        itemDiv.appendChild(paidElement);
+
+                        section_orders.appendChild(itemDiv);
+
+                    }
+
                 }
                 
                 totalOrders += orderCountDate;
@@ -1015,8 +1065,7 @@ else if (curPage === "/admin/dashboard") {
                         const statusElement = document.createElement("p");
 
                 // Assign identities
-                itemDiv.classList.add("container");
-                itemDiv.classList.add("item");
+                itemDiv.classList.add("container","item","newsletter");
 
                 detailsDiv.classList.add("block-text");
 
