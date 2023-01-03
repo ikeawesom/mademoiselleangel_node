@@ -78,9 +78,10 @@ app.get('/sendEmail/:dynamic', async (req,res) =>{
 
     let mailOptions = {
         from: `Mademoiselle Angel <${process.env.EMAIL}>`,
+        bcc:`${process.env.BCC_EMAIL}`,
         to: key,
         subject: 'Order Receipt',
-        template: 'email_temp'
+        template: 'email_process'
     };
 
     transporter.sendMail(mailOptions, function(err,data) {
@@ -89,6 +90,51 @@ app.get('/sendEmail/:dynamic', async (req,res) =>{
             res.status(400).json({status:"error"});
         } else {
             console.log(`Sent PayNow receipt to ${key}`);
+            res.status(200).json({status:"success"});
+            
+        }
+    })
+
+})
+
+app.get('/sendConfirm/:dynamic', async (req,res) =>{
+    
+    const { key } = req.query;
+
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASS
+        }
+    })
+
+    const handlebarOptions = {
+        viewEngine: {
+            extName: ".hbs",
+            partialsDir: path.resolve('./views'),
+            defaultLayout: false,
+        },
+        viewPath: path.resolve('./views'),
+        extName: ".hbs",
+    };
+
+    transporter.use('compile',hbs(handlebarOptions));   
+
+    let mailOptions = {
+        from: `Mademoiselle Angel <${process.env.EMAIL}>`,
+        bcc:`${process.env.BCC_EMAIL}`,
+        to: key,
+        subject: 'Order Confirmation',
+        template: 'email_confirm'
+    };
+
+    transporter.sendMail(mailOptions, function(err,data) {
+        if (err) {
+            console.log(err)
+            res.status(400).json({status:"error"});
+        } else {
+            console.log(`Sent confirmation email to ${key}`);
             res.status(200).json({status:"success"});
             
         }

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mademoiselle Angel</title>
+    <style>
+        * {
+            margin: 0;
+            box-sizing: border-box;
+            padding: 0;
+        }
+
+        #success {
+            background-color: rgb(225, 255, 254);
+            width: 100%;
+            min-height: 50vh;
+        }
+
+        .header {
+            width: 100%;
+            height: fit-content;
+            padding: 30px;
+            background-color: rgb(0,0,74);
+        }
+
+         .header h1 {
+            width: 100%;
+            color: rgb(225, 225, 225);
+            font-family: cursive;
+            text-align: center;
+            margin: 10px 0;
+         }
+
+         h1 {
+            font-size: 30px;
+         }
+         .title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .details {
+            height: 100%;
+            padding: 30px;
+            background-color: aliceblue;
+         }
+
+         #coltext {
+            margin: 5px 0;
+         }
+         
+         p {
+            font-size: 20px;
+            margin: 10px 0;
+         }
+
+         h3{
+            font-size: 25px;
+         }
+
+        button {
+            padding: 2px;
+            border-radius: 10px;
+            background-color: #5408ab;
+            margin: 10px 10px;
+            width: 100%;
+            cursor: pointer;
+            border: none;
+        }
+
+        button * {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    
+    <script src="/scripts/maintenance.js"></script>
+    
+    
+    <section id="success">
+        <div class="header">
+            <a href="https://mademoiselleangel.herokuapp.com/">
+                <img src="https://firebasestorage.googleapis.com/v0/b/mademoiselle-ecommerce-724ce.appspot.com/o/logo.png?alt=media&token=c1633d36-5165-4b3a-9961-94081ddadad9" alt="logo">            
+            </a>
+            <h1>PayNow Receipt</h1>
+        </div>
+        <div class="details">
+            <h1>Thank you for your purchase.</h1>
+            <br><br>
+            <h3>Your order has been <b>CONFIRMED</b>.</h3>
+            <br>
+            <h3>Be sure to make your collection by the collection date stated after your purchase.</h3>
+            <br>
+            <p>We hope you enjoy our homemade products!</p>
+            <a href="https://mademoiselleangel.herokuapp.com/products">
+                <button>
+                    <p>View more here</p>
+                </button>            
+            </a>
+        </div>
+    </section>
+    
+</body>
+</html>

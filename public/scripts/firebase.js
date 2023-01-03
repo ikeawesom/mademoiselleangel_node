@@ -129,39 +129,57 @@ async function sendReceipt(email) {
     console.log(status);
     if (status.status === "success") {
         window.location.href = "/success";
-        localStorage.removeItem("cartCount");
     } else {
         alert(status.status);
     }
 }
 
-async function confirmOrder(date,time,id,itemDiv,paidElement,paid) {
-    const res = await fetch(baseURL+"confirmOrder",{
-        method: 'POST',
-        headers: {
-            'Content-Type':'application/json'
-        },
-        body: JSON.stringify({
-            date:date,
-            time:time,
-            id:id,
+async function confirmOrder(date,time,id,itemDiv,paidElement,paid,email) {
+    if (paidElement.classList.contains("confirm")) return
+    const before = paidElement.innerHTML;
+    var db = false;
+    var sending = false;
+    if (!db) {
+        db = true;
+        paidElement.innerHTML = "Confirming..."
+        const res = await fetch(baseURL+"confirmOrder",{
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                date:date,
+                time:time,
+                id:id,
+            })
         })
-    })
-    const result = await res.json();
-    if (result.result === true) {
-        itemDiv.style.transition = '0.4s'
-        paidElement.style.transition = '0.4s'
-        itemDiv.classList.remove("not-confirmed")
-        paidElement.classList.add("confirm");
-        setTimeout(() => {
-            itemDiv.style.transition = '0s'
-            paidElement.style.transition = '0s'
-        }, 1000);
-        
-        paidElement.innerHTML = `Order Confirmed: SGD ${paid}`
-        
-    } else {
-        alert(`An error has occured: ${result.result}. \n\nPlease try again later.`)
+        const result = await res.json();
+        if (result.result === true && !sending) {
+            paidElement.innerHTML = "Sending confirmation email..."
+            sending = true;
+            // Changed DB
+            // Now send confirmation email
+            const resEmail = await fetch(`/sendConfirm/email?key=${email}`)
+            const resultEmail = await resEmail.json()
+            if (resultEmail.status === "success") {
+                itemDiv.style.transition = '0.4s'
+                paidElement.style.transition = '0.4s'
+                itemDiv.classList.remove("not-confirmed")
+                paidElement.classList.add("confirm");
+                setTimeout(() => {
+                    itemDiv.style.transition = '0s'
+                    paidElement.style.transition = '0s'
+                }, 1000);
+                
+                paidElement.innerHTML = `Order Confirmed: SGD ${paid}`
+            } else {
+                alert(`An error has occured: ${result.result}. \n\nPlease try again later.`)
+                paidElement.innerHTML = before;
+            }
+        } else {
+            alert(`An error has occured: ${result.result}. \n\nPlease try again later.`)
+            paidElement.innerHTML = before;
+        }
     }
 }
 
@@ -513,7 +531,15 @@ else if (curPage === "/paynow") {
             emailcorrect = false;
         }
 
-        if (paynowInput.value === "") {
+        function valPaynowInput(s) {
+            const invalid = [".", "#", "$", "[", "]"]
+            if (s === "") return false;
+            for (let i = 0; i < s.length; i++) {
+                if (invalid.includes(s.charAt(i))) return false
+            }
+            return true
+        }
+        if (!valPaynowInput(paynowInput.value)) {
             idcorrect = false;
             paynowError.style.visibility = "visible";
             paynowError.innerHTML = "Enter a valid PayNow identification."
@@ -834,7 +860,7 @@ else if (curPage === "/admin/dashboard") {
                             itemDiv.classList.add("not-confirmed");
                             paidElement.innerHTML = "Confirm Order";
                             paidElement.addEventListener('click',function() {
-                                confirmOrder(date,time,id,itemDiv,paidElement,paid)
+                                confirmOrder(date,time,id,itemDiv,paidElement,paid,email)
                             })
                         } else {
                             paidElement.innerHTML = `Order Confirmed: SGD ${paid}`;
