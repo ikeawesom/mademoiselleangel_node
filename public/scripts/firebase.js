@@ -578,7 +578,7 @@ else if (curPage === "/paynow") {
             var cartString = "| "
 
             for (const [key, value] of Object.entries(cartOBJ)) {
-                cartString += key + " | ";
+                cartString += key + ` x ${value[0]}` + " |\n";
             }
             
             async function add_Paynow() {
