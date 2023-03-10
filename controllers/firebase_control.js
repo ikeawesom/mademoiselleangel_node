@@ -158,6 +158,7 @@ exports.auth_control = (req,res) => {
                         email: snapshot.val()["email"],
                         uid: user.uid
                     })
+                    console.log(user.uid);
                 } else {
                     console.log("invalid access");
                     res.status(200).json({
